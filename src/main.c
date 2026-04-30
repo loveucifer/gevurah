@@ -6,16 +6,13 @@
 #include <stdint.h>
 #include "display.h"
 
-
 bool is_running = false;
-
 
 //SETUP
 // ok so here we are doing the color buffers , what we need to understand is that we are allocating color buffers
 // for each pixel that is set according to the window width and hieght that we initalized at the top
 // and then set a texture , the texture accepts 5 parameters , first one is where we want it which is the renderer
 // then the pixel format , acces and then the height and width of the texture
-
 
 void setup(void){
 
@@ -61,6 +58,8 @@ void render(void){
     SDL_RenderClear(renderer);
 
     draw_grid();
+
+    draw_pixel(20, 25, 0xFFFFFF00);
     draw_rec(300, 200,300, 150, 0xFFFF00FF);
 
     render_color_buffer();
