@@ -131,6 +131,28 @@ void update(void){
         //TODO
 }
 
+
+void draw_grid(void){
+    for (int y = 0; y < window_height; y ++) {
+        for (int x =0; x < window_width; x++) {
+            if (x %10 == 0 || y %10 == 0) {
+                color_buffer[(window_width*y)+x] = 0XFF333333;
+            }
+        }
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 // rendering color buffer first we use the sdl update texture function we lets us update the texture
 // here it accpets arguments first one we use is what texutre what we want to use which is ofc the
 // color_buffer_texture we setup next is if we want any rectangular subdivision which is null for us
@@ -177,8 +199,12 @@ void clear_color_buffer(uint32_t color){
 void render(void){
     SDL_SetRenderDrawColor(renderer,255,0,0,255);
     SDL_RenderClear(renderer);
+
+    draw_grid();
+
     render_color_buffer();
-    clear_color_buffer(0XFFFFFF00);
+    clear_color_buffer(0XFF000000);
+
     SDL_RenderPresent(renderer);
 }
 
