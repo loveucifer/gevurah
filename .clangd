@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - "-I/opt/homebrew/include"
+    - "-I/opt/homebrew/include/SDL2"
+    - "-xc"
+  CompilationDatabase: .
