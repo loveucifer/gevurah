@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include "display.h"
 
-bool is_running = false;
+bool is_running = false; // check init window
 
 //SETUP
 // ok so here we are doing the color buffers , what we need to understand is that we are allocating color buffers

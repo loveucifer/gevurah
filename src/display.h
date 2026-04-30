@@ -8,8 +8,6 @@
 #include <string.h>
 #include <stdint.h>
 
-
-
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
 extern uint32_t* color_buffer; // color buffer is a pointer to the first position of array of 32 bit integers of color values
