@@ -8,6 +8,11 @@
 #include <string.h>
 #include <stdint.h>
 
+
+
+#define FPS 60
+#define FRAME_TARGET_TIME  (1000/FPS)      // framer target time is like how much time each frame takes  or how much milllisecond each frame takes to complete the 60fps
+
 extern SDL_Window* window;
 extern SDL_Renderer* renderer;
 extern uint32_t* color_buffer; // color buffer is a pointer to the first position of array of 32 bit integers of color values
