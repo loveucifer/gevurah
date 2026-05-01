@@ -19,7 +19,7 @@ make build
 make run
 ```
 
-## Sources
+## Resources
 
 
 - [Gabriel Gambeta - 3D Graphics](https://gabrielgambetta.com)
