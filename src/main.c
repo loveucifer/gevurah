@@ -8,11 +8,14 @@
 #include "vector.h"
 
 
-float fov_factor = 130.0f;
+float fov_factor = 640;
 
 #define N_POINTS (9 * 9 * 9)
+
 Vec3_t cube_points[N_POINTS];
 Vec2_t projected_points[N_POINTS];
+Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
+Vec3_t cube_rotate = {.x =0, .y=0, .z =0 };
 
 bool is_running = false; // check init window
 
@@ -76,8 +79,8 @@ void process_input(void){
 
 Vec2_t project(Vec3_t point){
     Vec2_t projected_point = {
-        .x = (fov_factor * point.x),
-        .y = (fov_factor * point.y)
+        .x = (fov_factor * point.x)/point.z,
+        .y = (fov_factor * point.y)/point.z
     };
 
     return projected_point;
@@ -86,11 +89,29 @@ Vec2_t project(Vec3_t point){
 
 
 void update(void){
+    cube_rotate.z += 0.001;
+    cube_rotate.y += 0.001;
+    cube_rotate.x += 0.001;
+
+
     for (int i =0; i < N_POINTS; i++) {
         Vec3_t point = cube_points[i];
 
+
+
+        Vec3_t transformed_point = Vec3_rotate_x(point, cube_rotate.x);
+        transformed_point = Vec3_rotate_y(transformed_point, cube_rotate.y);
+        transformed_point = Vec3_rotate_z(transformed_point, cube_rotate.z);
+
+
+
+
+
+
+        transformed_point.z -= camera_pos.z; // transalte points away from camera
+
         // project point
-        Vec2_t projected_point = project(point);
+        Vec2_t projected_point = project(transformed_point);
 
         projected_points[i] = projected_point;
     }
@@ -108,7 +129,7 @@ void render(void){
             projected_point.y + (window_height / 2),
             4,
             4,
-            0xFFFFFF00);
+            0xFF3399);
     }
 
     render_color_buffer();
