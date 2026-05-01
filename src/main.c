@@ -7,8 +7,12 @@
 #include "display.h"
 #include "vector.h"
 
-const int N_POINTS = 9 * 9 * 9;
+
+float fov_factor = 130.0f;
+
+#define N_POINTS (9 * 9 * 9)
 Vec3_t cube_points[N_POINTS];
+Vec2_t projected_points[N_POINTS];
 
 bool is_running = false; // check init window
 
@@ -29,7 +33,6 @@ void setup(void){
         window_height);
 
 
-
     int point_count = 0;
     // load array of vectors
     for (float x= -1; x <= 1 ; x+=0.25) {
@@ -43,6 +46,8 @@ void setup(void){
         }
     }
 }
+
+
 
 void process_input(void){
     SDL_Event event;
@@ -67,19 +72,44 @@ void process_input(void){
     }
 }
 
+/// this function helps us produce a projected 2d point by reciveing a 3d point
+
+Vec2_t project(Vec3_t point){
+    Vec2_t projected_point = {
+        .x = (fov_factor * point.x),
+        .y = (fov_factor * point.y)
+    };
+
+    return projected_point;
+}
+
+
 
 void update(void){
-        //TODO
+    for (int i =0; i < N_POINTS; i++) {
+        Vec3_t point = cube_points[i];
+
+        // project point
+        Vec2_t projected_point = project(point);
+
+        projected_points[i] = projected_point;
+    }
 }
 
 void render(void){
-    SDL_SetRenderDrawColor(renderer,255,0,0,255);
-    SDL_RenderClear(renderer);
+
 
     draw_grid();
 
-    draw_pixel(20, 25, 0xFFFFFF00);
-    draw_rec(300, 200,300, 150, 0xFFFF00FF);
+    for (int i = 0; i < N_POINTS; i++) {
+        Vec2_t projected_point = projected_points[i];
+        draw_rec(
+            projected_point.x + (window_width /2),
+            projected_point.y + (window_height / 2),
+            4,
+            4,
+            0xFFFFFF00);
+    }
 
     render_color_buffer();
     clear_color_buffer(0XFF000000);

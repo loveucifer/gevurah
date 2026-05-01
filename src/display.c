@@ -73,7 +73,7 @@ bool init_window(void){
 // so this if condiiton checks whethere the values are in bounds
 
 void draw_pixel(int x, int y, uint32_t color){
-    if (x < window_width && y < window_height){
+    if (x>=0 && x < window_width && y >= 0 && y < window_height){
         color_buffer[(window_width * y) + x] = color;
     }
 }
@@ -83,7 +83,8 @@ void draw_rec(int x , int y, int width, int height, uint32_t color){
         for (int j =0; j < height; j++) {
             int now_x = x + i;
             int now_y = y +j;
-            color_buffer[(window_width * now_y)+now_x] = color;
+
+            draw_pixel(now_x, now_y,  color);
 
 
         }
