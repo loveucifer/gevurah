@@ -18,6 +18,7 @@ Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
 Vec3_t cube_rotate = {.x =0, .y=0, .z =0 };
 
 bool is_running = false; // check init window
+int previous_frame_time = 0;
 
 //SETUP
 // ok so here we are doing the color buffers , what we need to understand is that we are allocating color buffers
@@ -89,9 +90,13 @@ Vec2_t project(Vec3_t point){
 
 
 void update(void){
-    cube_rotate.z += 0.001;
+    while (!SDL_TICKS_PASSED(SDL_GetTicks(),previous_frame_time + FRAME_TARGET_TIME));
+    previous_frame_time = SDL_GetTicks();
+
     cube_rotate.y += 0.001;
     cube_rotate.x += 0.001;
+    cube_rotate.z += 0.001;
+
 
 
     for (int i =0; i < N_POINTS; i++) {
@@ -138,6 +143,9 @@ void render(void){
     SDL_RenderPresent(renderer);
 }
 
+
+
+// game loop
 
 int main(void){
     //SDL window
