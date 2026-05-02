@@ -129,18 +129,23 @@ void update(void){
 
 void render(void){
 
-    draw_grid();
+    // draw_grid();
 
-    /*for (int i = 0; i < N_MESH_FACES; i++) {
+    for (int i = 0; i < N_MESH_FACES; i++) {
 
       triangle_t triangle = triangles_to_render[i];
 
-      draw_rec(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFFFFFF00);
-      draw_rec(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFFFFFF00);
-      draw_rec(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFFFFFF00);
- */
+      draw_rec(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFF800080);
+      draw_rec(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFF800080);
+      draw_rec(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFF800080);
 
-    draw_line(100,200,300,50,0XFF00FF00);
+      draw_triangle(
+          triangle.points[0].x, triangle.points[0].y,
+          triangle.points[1].x, triangle.points[1].y,
+          triangle.points[2].x, triangle.points[2].y,
+          0xFF800080
+      );
+    }
 
     render_color_buffer();
     clear_color_buffer(0XFF000000);

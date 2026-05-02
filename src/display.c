@@ -1,5 +1,6 @@
 #include "display.h"
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 // its objectively better to start these pointers as NULL because they only have value when they are passed in
@@ -60,11 +61,17 @@ bool init_window(void){
 }
 
 
+void draw_triangle(int x0 , int y0 , int x1 , int y1 , int x2 , int y2, uint32_t color){
+    draw_line(x0, y0,  x1,  y1, color);
+    draw_line(x1, y1, x2, y2, color);
+    draw_line(x2, y2, x0, y0, color);
+}
+
  void draw_grid(void){
     for (int y = 0; y < window_height; y += 10) {
         for (int x =0; x < window_width; x+=10) {
 
-                color_buffer[(window_width*y)+x] = 0XFF333333;
+            color_buffer[(window_width*y)+x] = 0XFF333333;
 
         }
 
@@ -95,23 +102,13 @@ void draw_line (int x0 , int y0 , int x1, int y1, uint32_t color){
     float current_y = y0;
 
     for (int i =0; i <= side_length; i++){
-        draw_pixel(round(current_x), round(current_y), 0xFFFFFF00);
+        draw_pixel(round(current_x), round(current_y),color);
         current_x += x_inc;
         current_y += y_inc;
 
     }
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 void draw_rec(int x , int y, int width, int height, uint32_t color){
@@ -127,26 +124,6 @@ void draw_rec(int x , int y, int width, int height, uint32_t color){
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // rendering color buffer first we use the sdl update texture function we lets us update the texture
 // here it accpets arguments first one we use is what texutre what we want to use which is ofc the
