@@ -25,6 +25,7 @@ extern mesh_t mesh;  // global mesh variable
 
 
 void load_cube (void);
+void load_obj_file(char* filename);
 
 
 #endif

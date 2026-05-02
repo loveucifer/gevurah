@@ -37,8 +37,9 @@ void setup(void){
         window_width,
         window_height);
 
-
-    load_cube();
+    // loads cube value into the mesh
+    //load_cube();
+    load_obj_file("./assets/fighter.obj");
 
 }
 
@@ -114,7 +115,7 @@ void update(void){
             transformed_vertex = Vec3_rotate_y(transformed_vertex, mesh.rotation.y);
             transformed_vertex = Vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
-            transformed_vertex.z = camera_pos.z;
+            transformed_vertex.z -= camera_pos.z;
 
             Vec2_t projected_point = project(transformed_vertex);
             // scale and tranlate projected pointsss
