@@ -10,13 +10,11 @@
 #include "triangle.h"
 #include "array.h"
 
-triangle_t * triangles_to_render = NULL;
+triangle_t* triangles_to_render = NULL;
 
 
 
 Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
-Vec3_t cube_rotate = {.x =0, .y=0, .z =0 };
-
 
 float fov_factor = 640;
 
@@ -38,6 +36,9 @@ void setup(void){
         SDL_TEXTUREACCESS_STREAMING,
         window_width,
         window_height);
+
+
+    load_cube();
 
 }
 
@@ -86,21 +87,19 @@ void update(void){
     // initalize the array of triangles to render
     triangles_to_render = NULL;
 
+    mesh.rotation.y += 0.01;
+    mesh.rotation.x += 0.01;
+    mesh.rotation.z += 0.01;
 
+    int num_faces = array_length(mesh.faces);
 
-
-
-    cube_rotate.y += 0.01;
-    cube_rotate.x += 0.01;
-    cube_rotate.z += 0.01;
-
-    for (int i = 0; i < N_MESH_FACES; i++){
-        face_t mesh_face = mesh_faces[i];
+    for (int i = 0; i < num_faces; i++){
+        face_t mesh_face = mesh.faces[i];
 
         Vec3_t face_vertices[3];
-        face_vertices[0] = mesh_vertices[mesh_face.a - 1];
-        face_vertices[1] = mesh_vertices[mesh_face.b - 1];
-        face_vertices[2] = mesh_vertices[mesh_face.c - 1];
+        face_vertices[0] = mesh.vertices[mesh_face.a - 1];
+        face_vertices[1] = mesh.vertices[mesh_face.b - 1];
+        face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
 
 
@@ -111,9 +110,9 @@ void update(void){
             Vec3_t transformed_vertex = face_vertices[j];
 
 
-            transformed_vertex = Vec3_rotate_x(transformed_vertex, cube_rotate.x);
-            transformed_vertex = Vec3_rotate_y(transformed_vertex, cube_rotate.y);
-            transformed_vertex = Vec3_rotate_z(transformed_vertex, cube_rotate.z);
+            transformed_vertex = Vec3_rotate_x(transformed_vertex, mesh.rotation.x);
+            transformed_vertex = Vec3_rotate_y(transformed_vertex, mesh.rotation.y);
+            transformed_vertex = Vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
             transformed_vertex.z = camera_pos.z;
 
@@ -158,10 +157,20 @@ void render(void){
     // clear array
     array_free(triangles_to_render);
 
+
     render_color_buffer();
     clear_color_buffer(0XFF000000);
 
     SDL_RenderPresent(renderer);
+}
+
+
+// free memory
+
+void free_resources(void) {
+    array_free(mesh.faces);
+    array_free(mesh.vertices);
+    free(color_buffer);
 }
 
 
@@ -180,5 +189,6 @@ int main(void){
         render();
     }
     destruct_window();
+    free_resources();
     return 0;
 }

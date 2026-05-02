@@ -169,7 +169,7 @@ void clear_color_buffer(uint32_t color){
 // so like as above so below
 
 void destruct_window(void){
-    free(color_buffer);
+    // free(color_buffer);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
