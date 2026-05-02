@@ -8,8 +8,9 @@
 #include "vector.h"
 #include "mesh.h"
 #include "triangle.h"
+#include "array.h"
 
-triangle_t triangles_to_render[N_MESH_VERTICES];
+triangle_t * triangles_to_render = NULL;
 
 
 
@@ -82,6 +83,13 @@ void update(void){
     while (!SDL_TICKS_PASSED(SDL_GetTicks(),previous_frame_time + FRAME_TARGET_TIME));
     previous_frame_time = SDL_GetTicks();
 
+    // initalize the array of triangles to render
+    triangles_to_render = NULL;
+
+
+
+
+
     cube_rotate.y += 0.01;
     cube_rotate.x += 0.01;
     cube_rotate.z += 0.01;
@@ -123,15 +131,15 @@ void update(void){
         }
 
         // save the projected triangle in the array of traingles trying to render
-        triangles_to_render[i] = projected_triangle;
+        array_push(triangles_to_render, projected_triangle);
      }
  }
 
 void render(void){
 
     // draw_grid();
-
-    for (int i = 0; i < N_MESH_FACES; i++) {
+    int no_of_triangles = array_length(triangles_to_render);
+    for (int i = 0; i < no_of_triangles; i++) {
 
       triangle_t triangle = triangles_to_render[i];
 
@@ -146,6 +154,9 @@ void render(void){
           0xFF800080
       );
     }
+
+    // clear array
+    array_free(triangles_to_render);
 
     render_color_buffer();
     clear_color_buffer(0XFF000000);
