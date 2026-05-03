@@ -41,7 +41,14 @@ Vec2_t vec2_div(Vec2_t v, float factor){
     return result;
 }
 
+float vec2_dot(Vec2_t a, Vec2_t b){
+    return ( a.x * b.x) + (a.y * b.y);
+}
 
+
+///////////////////////////////////////
+//// vec3 ////////////////////////////
+// //////////////////////////////////
 
 float vec3_len(Vec3_t v){
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -82,6 +89,29 @@ Vec3_t vec3_div(Vec3_t v, float factor) {
   };
   return result;
 }
+
+Vec3_t vec3_cross(Vec3_t a, Vec3_t b){
+    Vec3_t result = {
+        .x = a.y * b.z - a.z * b.y,
+        .y = a.z * b.x - a.x * b.z,
+        .z = a.x * b.y - a.y * b.x
+    };
+    return result;
+}
+
+float vec3_dot(Vec3_t a, Vec3_t b){
+    return ( a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+}
+
+
+
+
+
+
+
+
+
+
 
 Vec3_t Vec3_rotate_x(Vec3_t v, float angle) {
   Vec3_t rotated_vector = {.x = v.x,
