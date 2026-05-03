@@ -39,8 +39,17 @@ void setup(void){
 
     // loads cube value into the mesh
     //load_cube();
-    load_obj_file("./assets/fighter.obj");
+    load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
 
+
+
+   // usage
+   /* Vec3_t a = {2.5 , 6.4 , 3.0};
+    Vec3_t b = {-2.2 , 1.4 , -1.0};
+
+
+    float a_length = vec3_len(a);
+    float b_length = vec3_len(b); */
 }
 
 
