@@ -12,10 +12,8 @@
 
 triangle_t* triangles_to_render = NULL;
 
-
-
-Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
-
+// Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
+Vec3_t camera_pos = { 0,0,0};
 float fov_factor = 640;
 
 bool is_running = false; // check init window
@@ -113,9 +111,14 @@ void update(void){
 
 
 
-        triangle_t projected_triangle;
+        // triangle_t projected_triangle;
         // loop all three vertices of this face and transofrm them
-        //
+
+
+        Vec3_t transformed_vertices[3];
+
+
+
         for (int j = 0; j< 3; j++) {
             Vec3_t transformed_vertex = face_vertices[j];
 
@@ -124,21 +127,51 @@ void update(void){
             transformed_vertex = Vec3_rotate_y(transformed_vertex, mesh.rotation.y);
             transformed_vertex = Vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
-            transformed_vertex.z -= camera_pos.z;
+            transformed_vertex.z += 5;
 
-            Vec2_t projected_point = project(transformed_vertex);
+            transformed_vertices[j] = transformed_vertex;
+        }
+
+        /////////////////////////////////
+        ///// backface culling     //////
+        /////////////////////////////////
+
+        Vec3_t vector_a = transformed_vertices[0];
+        Vec3_t vector_b = transformed_vertices[1];
+        Vec3_t vector_c = transformed_vertices[2];
+
+        Vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+        Vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+
+
+        Vec3_t normal = vec3_cross(vector_ab, vector_ac);
+
+        // find a vector between point in triangle and camera origin
+
+        Vec3_t cam_ray = vec3_sub(camera_pos, vector_a);
+
+
+        // calculate hoiw aligned camera ray is with face normal using dot product
+
+        float normal_camera = vec3_dot(normal, cam_ray);
+
+
+        // bypass trianngles that are looking away from camera
+        if (normal_camera < 0){
+            continue;
+        }
+
+        triangle_t projected_triangle;
+
+        for (int j = 0; j < 3; j++) {
+
+            Vec2_t projected_point = project(transformed_vertices[j]);
             // scale and tranlate projected pointsss
             projected_point.x += (window_width /2 );
             projected_point.y += (window_height/ 2);
-
-
-            // transalte vertex away from camera
-
-
-
+            // transalte vertex away from camer
             projected_triangle.points[j] = projected_point;
         }
-
         // save the projected triangle in the array of traingles trying to render
         array_push(triangles_to_render, projected_triangle);
      }
