@@ -45,6 +45,12 @@ float vec2_dot(Vec2_t a, Vec2_t b){
     return ( a.x * b.x) + (a.y * b.y);
 }
 
+void vec2_normalize(Vec2_t *v){
+    float length = sqrt(v->x * v->x + v->y * v->y );
+    v->x /= length;
+    v->y /= length;
+}
+
 
 ///////////////////////////////////////
 //// vec3 ////////////////////////////
@@ -104,7 +110,12 @@ float vec3_dot(Vec3_t a, Vec3_t b){
 }
 
 
-
+void vec3_normalize(Vec3_t *v){
+    float length = sqrt(v->x * v->x + v->y * v->y +  v->z * v->z );
+    v->x /= length;
+    v->y /= length;
+    v->z /= length;
+}
 
 
 

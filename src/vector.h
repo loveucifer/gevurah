@@ -22,6 +22,7 @@ Vec2_t vec2_sub(Vec2_t a, Vec2_t b);
 Vec2_t vec2_mul(Vec2_t v, float factor );
 Vec2_t vec2_div(Vec2_t v , float factor);
 float vec2_dot(Vec2_t a , Vec2_t b);
+void vec2_normalize (Vec2_t* v);
 
 
 
@@ -39,6 +40,7 @@ Vec3_t Vec3_rotate_z(Vec3_t v, float angle);
 
 Vec3_t vec3_cross(Vec3_t a , Vec3_t b);
 float  vec3_dot(Vec3_t a , Vec3_t b);
+void vec3_normalize (Vec3_t* v);
 
 
 #endif

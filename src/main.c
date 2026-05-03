@@ -142,9 +142,15 @@ void update(void){
 
         Vec3_t vector_ab = vec3_sub(vector_b, vector_a);
         Vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+        vec3_normalize(&vector_ab);
+        vec3_normalize(&vector_ac);
 
 
         Vec3_t normal = vec3_cross(vector_ab, vector_ac);
+
+        // normalize the face of the normal vector
+
+        vec3_normalize(&normal);
 
         // find a vector between point in triangle and camera origin
 
