@@ -186,7 +186,7 @@ void update(void){
 void render(void){
 
     // draw_grid();
-    int no_of_triangles = array_length(triangles_to_render);
+    /*int no_of_triangles = array_length(triangles_to_render);
     for (int i = 0; i < no_of_triangles; i++) {
 
       triangle_t triangle = triangles_to_render[i];
@@ -201,8 +201,8 @@ void render(void){
           triangle.points[2].x, triangle.points[2].y,
           0xFF800080
       );
-    }
-
+      } */
+    draw_filled_triangle(300,100,50,400,500,700,0xFF00FF00);
     // clear array
     array_free(triangles_to_render);
 
