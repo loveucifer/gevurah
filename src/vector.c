@@ -4,28 +4,28 @@
 
 // this is very bad practice ngl
 
-float Vec3_len(Vec3_t v){
+float vec2_len(Vec2_t v){
     return sqrt(v.x * v.x + v.y * v.y );
 };
 
-Vec3_t Vec3_add(Vec3_t a, Vec3_t b){
-    Vec3_t result = {
+Vec2_t vec2_add(Vec2_t a, Vec2_t b){
+    Vec2_t result = {
         .x = a.x + b.x,
         .y = a.y + b.y
     };
     return result;
 }
 
-Vec3_t Vec3_sub(Vec3_t a, Vec3_t b){
-    Vec3_t result = {
+Vec2_t vec2_sub(Vec2_t a, Vec2_t b){
+    Vec2_t result = {
         .x = a.x - b.x,
         .y = a.y - b.y
     };
     return result;
 }
 
-Vec3_t Vec3_mul(Vec3_t v, float factor);{
-    Vec3_t result = {
+Vec2_t vec2_mul(Vec2_t v, float factor){
+    Vec2_t result = {
         .x = v.x * factor,
         .y = v.y * factor
     };
@@ -33,17 +33,15 @@ Vec3_t Vec3_mul(Vec3_t v, float factor);{
 }
 
 
-Vec3_t Vec3_div(Vec3_t v, float factor){
-    Vec3_t result = {
+Vec2_t vec2_div(Vec2_t v, float factor){
+    Vec2_t result = {
         .x = v.x / factor,
         .y = v.y / factor
     };
     return result;
 }
 
-//////////////////////////
-// 3d vector functions
-//////////////////////////
+
 
 float vec3_len(Vec3_t v){
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
