@@ -40,9 +40,6 @@ int previous_frame_time = 0;
 struct nk_context *nk_ctx = NULL;
 
 
-render_mode_t render_mode = RENDER_WIRE_VERTEX;  /* boots into mode 1 */
-bool cull_backface = true;                        /* culling on by default */
-
 //SETUP
 // ok so here we are doing the color buffers , what we need to understand is that we are allocating color buffers
 // for each pixel that is set according to the window width and hieght that we initalized at the top
@@ -50,6 +47,10 @@ bool cull_backface = true;                        /* culling on by default */
 // then the pixel format , acces and then the height and width of the texture
 
 void setup(void){
+
+
+    render_method = RENDER_WIRE;
+    cull_method = CULL_BACKFACE;
 
     color_buffer = (uint32_t*)malloc(sizeof(uint32_t)* window_width * window_height);
     color_buffer_texture = SDL_CreateTexture(
@@ -62,6 +63,8 @@ void setup(void){
     // loads cube value into the mesh
     //load_cube();
     load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
+
+
 
     // nuklear init happens after the renderer is created
     nk_ctx = nk_sdl_init(window, renderer);
@@ -107,12 +110,12 @@ void process_input(void){
             break;
         case SDL_KEYDOWN:
             if (event.key.keysym.sym == SDLK_ESCAPE) is_running = false;
-            if (event.key.keysym.sym == SDLK_1) render_mode = RENDER_WIRE_VERTEX;
-            if (event.key.keysym.sym == SDLK_2) render_mode = RENDER_WIRE;
-            if (event.key.keysym.sym == SDLK_3) render_mode = RENDER_FILL;
-            if (event.key.keysym.sym == SDLK_4) render_mode = RENDER_FILL_WIRE;
-            if (event.key.keysym.sym == SDLK_c) cull_backface = true;
-            if (event.key.keysym.sym == SDLK_d) cull_backface = false;
+            if (event.key.keysym.sym == SDLK_1) render_method = RENDER_WIRE_VERTEX;
+            if (event.key.keysym.sym == SDLK_2) render_method = RENDER_WIRE;
+            if (event.key.keysym.sym == SDLK_3) render_method = RENDER_FILL;
+            if (event.key.keysym.sym == SDLK_4) render_method = RENDER_FILL_WIRE;
+            if (event.key.keysym.sym == SDLK_c) cull_method = CULL_BACKFACE;
+            if (event.key.keysym.sym == SDLK_d) cull_method = CULL_NONE;
         break;
 
     }
@@ -209,12 +212,9 @@ void update(void){
 
         // bypass trianngles that are looking away from camera
         /* skip back-facing triangles only when culling is enabled */
-        if (cull_backface && normal_camera < 0) {
+        if (cull_method == CULL_BACKFACE && normal_camera < 0) {
             continue;
         }
-        // if cull backface is false c never evaluates the second half the continue never
-        // fires and every face gets through to the render sstep
-        // press d and all face become visible and c back fces skilled again ez
 
         triangle_t projected_triangle;
 
@@ -245,26 +245,26 @@ void render(void){
       draw_rec(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFF800080);
 
 
-     if (render_mode == RENDER_FILL || render_mode == RENDER_FILL_WIRE) {
+     if (render_method == RENDER_FILL || render_method == RENDER_FILL_WIRE) {
       draw_filled_triangle(
           triangle.points[0].x, triangle.points[0].y,
           triangle.points[1].x, triangle.points[1].y,
           triangle.points[2].x, triangle.points[2].y,
-          0xFFFFFFFF
+          0xFF1E3A5F
       );
      }
-     if (render_mode == RENDER_WIRE_VERTEX ||
-         render_mode == RENDER_WIRE        ||
-         render_mode == RENDER_FILL_WIRE) {
+     if (render_method == RENDER_WIRE_VERTEX ||
+         render_method == RENDER_WIRE        ||
+         render_method == RENDER_FILL_WIRE) {
       // draw an unfilled trinalge it looks ugly without it
       draw_triangle(
           triangle.points[0].x, triangle.points[0].y,
           triangle.points[1].x, triangle.points[1].y,
           triangle.points[2].x, triangle.points[2].y,
-          0xFF000000
+          0xFF00FF00
       );
       }
-     if (render_mode == RENDER_WIRE_VERTEX) {
+     if (render_method == RENDER_WIRE_VERTEX) {
          draw_rec(triangle.points[0].x - 2, triangle.points[0].y - 2, 5, 5, 0xFFFF0000);
          draw_rec(triangle.points[1].x - 2, triangle.points[1].y - 2, 5, 5, 0xFFFF0000);
          draw_rec(triangle.points[2].x - 2, triangle.points[2].y - 2, 5, 5, 0xFFFF0000);
@@ -294,19 +294,19 @@ void render(void){
 
            nk_layout_row_dynamic(nk_ctx, 30, 1);
            if (nk_button_label(nk_ctx, "1 - Wireframe + Dots"))
-               render_mode = RENDER_WIRE_VERTEX;
+               render_method = RENDER_WIRE_VERTEX;
 
            nk_layout_row_dynamic(nk_ctx, 30, 1);
            if (nk_button_label(nk_ctx, "2 - Wireframe Only"))
-               render_mode = RENDER_WIRE;
+               render_method = RENDER_WIRE;
 
            nk_layout_row_dynamic(nk_ctx, 30, 1);
            if (nk_button_label(nk_ctx, "3 - Filled Only"))
-               render_mode = RENDER_FILL;
+               render_method = RENDER_FILL;
 
            nk_layout_row_dynamic(nk_ctx, 30, 1);
            if (nk_button_label(nk_ctx, "4 - Filled + Wireframe"))
-               render_mode = RENDER_FILL_WIRE;
+               render_method = RENDER_FILL_WIRE;
 
            /* ── Section: Back-face Culling ── */
            nk_layout_row_dynamic(nk_ctx, 10, 1);
@@ -317,9 +317,9 @@ void render(void){
 
            nk_layout_row_dynamic(nk_ctx, 30, 2);
            if (nk_button_label(nk_ctx, "C - Enable"))
-               cull_backface = true;
+               cull_method = CULL_BACKFACE;
            if (nk_button_label(nk_ctx, "D - Disable"))
-               cull_backface = false;
+               cull_method = CULL_NONE;
 
            /* ── Section: Live Status ── */
            nk_layout_row_dynamic(nk_ctx, 10, 1);
@@ -329,8 +329,8 @@ void render(void){
            char status[64];
            snprintf(status, sizeof(status),
                     "Mode: %d  |  Cull: %s",
-                    (int)render_mode,
-                    cull_backface ? "ON" : "OFF");
+                    (int)render_method,
+                    cull_method == CULL_BACKFACE ? "ON" : "OFF");
            nk_label(nk_ctx, status, NK_TEXT_LEFT);
        }
        nk_end(nk_ctx);
