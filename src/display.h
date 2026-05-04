@@ -21,17 +21,17 @@ extern SDL_Texture* color_buffer_texture;
 extern int window_width;
 extern int window_height;
 
-typedef enum {
-    RENDER_WIRE_VERTEX = 1,  // wireframe lines + dot per vertex
-    RENDER_WIRE = 2,           // wireframes lines only
-    RENDER_FILL = 3,            // filled triangles
-    RENDER_FILL_WIRE = 4,       // filled triangles + wireframe
-} render_mode_t;
+enum {
+    RENDER_WIRE_VERTEX,  // wireframe lines + dot per vertex
+    RENDER_WIRE,           // wireframes lines only
+    RENDER_FILL,            // filled triangles
+    RENDER_FILL_WIRE,       // filled triangles + wireframe
+} render_method;
 
-
-extern render_mode_t render_mode;
-extern bool cull_backface;
-
+enum {
+    CULL_NONE,
+    CULL_BACKFACE
+} cull_method;
 
 
 bool init_window(void);
