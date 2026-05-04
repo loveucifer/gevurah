@@ -1,3 +1,19 @@
+/*  Nuklear config */
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_MEMSET memset
+#define NK_SDL_RENDERER_IMPLEMENTATION
+#include "nuklear.h"
+#define NK_SDL_RENDERER_SDL_H <SDL2/SDL.h>
+#include "nuklear_sdl_renderer.h"
+
+
+// renderer
 #include <stdio.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
@@ -19,6 +35,14 @@ float fov_factor = 640;
 bool is_running = false; // check init window
 int previous_frame_time = 0;
 
+
+// nuklear struct nk_context *nk_ctx = NULL
+struct nk_context *nk_ctx = NULL;
+
+
+render_mode_t render_mode = RENDER_WIRE_VERTEX;  /* boots into mode 1 */
+bool cull_backface = true;                        /* culling on by default */
+
 //SETUP
 // ok so here we are doing the color buffers , what we need to understand is that we are allocating color buffers
 // for each pixel that is set according to the window width and hieght that we initalized at the top
@@ -39,7 +63,16 @@ void setup(void){
     //load_cube();
     load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
 
+    // nuklear init happens after the renderer is created
+    nk_ctx = nk_sdl_init(window, renderer);
 
+    struct nk_font_atlas *atlas;
+    nk_sdl_font_stash_begin(&atlas);
+    nk_sdl_font_stash_end();
+
+    //nk_sdl_init` hands existing `window` and `renderer` so
+    // no new SDL window needed. The font stash calls bake the default
+    // built-in font into a texture the renderer can use.
 
    // usage
    /* Vec3_t a = {2.5 , 6.4 , 3.0};
@@ -54,7 +87,10 @@ void setup(void){
 
 void process_input(void){
     SDL_Event event;
-    SDL_PollEvent(&event);
+
+    nk_input_begin(nk_ctx);
+
+    while (SDL_PollEvent(&event)){
 
     // here we are passing in the address of the event declared above
     // we use a swtich statement to check the conditions that make is_running false so we can stop the game loop
@@ -63,16 +99,25 @@ void process_input(void){
     // yeah the closing red button window , THAT.
     // and if you can read the second case its just pressed down key and if the presseed down key is infact escape
     // you should also stop the loop whihc is is_running false
+    nk_sdl_handle_event( &event);
 
     switch (event.type) {
         case SDL_QUIT:
             is_running = false;
             break;
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE)
-                is_running = false;
-            break;
+            if (event.key.keysym.sym == SDLK_ESCAPE) is_running = false;
+            if (event.key.keysym.sym == SDLK_1) render_mode = RENDER_WIRE_VERTEX;
+            if (event.key.keysym.sym == SDLK_2) render_mode = RENDER_WIRE;
+            if (event.key.keysym.sym == SDLK_3) render_mode = RENDER_FILL;
+            if (event.key.keysym.sym == SDLK_4) render_mode = RENDER_FILL_WIRE;
+            if (event.key.keysym.sym == SDLK_c) cull_backface = true;
+            if (event.key.keysym.sym == SDLK_d) cull_backface = false;
+        break;
+
     }
+}
+nk_input_end(nk_ctx);
 }
 
 /// this function helps us produce a projected 2d point by reciveing a 3d point
@@ -163,9 +208,13 @@ void update(void){
 
 
         // bypass trianngles that are looking away from camera
-        if (normal_camera < 0){
+        /* skip back-facing triangles only when culling is enabled */
+        if (cull_backface && normal_camera < 0) {
             continue;
         }
+        // if cull backface is false c never evaluates the second half the continue never
+        // fires and every face gets through to the render sstep
+        // press d and all face become visible and c back fces skilled again ez
 
         triangle_t projected_triangle;
 
@@ -186,7 +235,7 @@ void update(void){
 void render(void){
 
     // draw_grid();
-    /*int no_of_triangles = array_length(triangles_to_render);
+    int no_of_triangles = array_length(triangles_to_render);
     for (int i = 0; i < no_of_triangles; i++) {
 
       triangle_t triangle = triangles_to_render[i];
@@ -195,14 +244,33 @@ void render(void){
       draw_rec(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFF800080);
       draw_rec(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFF800080);
 
+
+     if (render_mode == RENDER_FILL || render_mode == RENDER_FILL_WIRE) {
+      draw_filled_triangle(
+          triangle.points[0].x, triangle.points[0].y,
+          triangle.points[1].x, triangle.points[1].y,
+          triangle.points[2].x, triangle.points[2].y,
+          0xFFFFFFFF
+      );
+     }
+     if (render_mode == RENDER_WIRE_VERTEX ||
+         render_mode == RENDER_WIRE        ||
+         render_mode == RENDER_FILL_WIRE) {
+      // draw an unfilled trinalge it looks ugly without it
       draw_triangle(
           triangle.points[0].x, triangle.points[0].y,
           triangle.points[1].x, triangle.points[1].y,
           triangle.points[2].x, triangle.points[2].y,
-          0xFF800080
+          0xFF000000
       );
-      } */
-    draw_filled_triangle(300,100,50,400,500,700,0xFF00FF00);
+      }
+     if (render_mode == RENDER_WIRE_VERTEX) {
+         draw_rec(triangle.points[0].x - 2, triangle.points[0].y - 2, 5, 5, 0xFFFF0000);
+         draw_rec(triangle.points[1].x - 2, triangle.points[1].y - 2, 5, 5, 0xFFFF0000);
+         draw_rec(triangle.points[2].x - 2, triangle.points[2].y - 2, 5, 5, 0xFFFF0000);
+     }
+    }
+
     // clear array
     array_free(triangles_to_render);
 
@@ -210,8 +278,71 @@ void render(void){
     render_color_buffer();
     clear_color_buffer(0XFF000000);
 
-    SDL_RenderPresent(renderer);
-}
+
+    /* ─────────────────────────────────────────────────────
+          NUKLEAR DEBUG PANEL
+          This runs every frame. nk_begin returns true if the
+          window is open. nk_end closes the description block.
+       ───────────────────────────────────────────────────── */
+       if (nk_begin(nk_ctx, "Debug",
+                    nk_rect(10, 10, 240, 300),
+                    NK_WINDOW_BORDER | NK_WINDOW_TITLE | NK_WINDOW_MOVABLE)) {
+
+           /* ── Section: Render Mode ── */
+           nk_layout_row_dynamic(nk_ctx, 20, 1);
+           nk_label(nk_ctx, "Render Mode", NK_TEXT_LEFT);
+
+           nk_layout_row_dynamic(nk_ctx, 30, 1);
+           if (nk_button_label(nk_ctx, "1 - Wireframe + Dots"))
+               render_mode = RENDER_WIRE_VERTEX;
+
+           nk_layout_row_dynamic(nk_ctx, 30, 1);
+           if (nk_button_label(nk_ctx, "2 - Wireframe Only"))
+               render_mode = RENDER_WIRE;
+
+           nk_layout_row_dynamic(nk_ctx, 30, 1);
+           if (nk_button_label(nk_ctx, "3 - Filled Only"))
+               render_mode = RENDER_FILL;
+
+           nk_layout_row_dynamic(nk_ctx, 30, 1);
+           if (nk_button_label(nk_ctx, "4 - Filled + Wireframe"))
+               render_mode = RENDER_FILL_WIRE;
+
+           /* ── Section: Back-face Culling ── */
+           nk_layout_row_dynamic(nk_ctx, 10, 1);
+           nk_spacing(nk_ctx, 1);   /* visual gap */
+
+           nk_layout_row_dynamic(nk_ctx, 20, 1);
+           nk_label(nk_ctx, "Back-face Culling", NK_TEXT_LEFT);
+
+           nk_layout_row_dynamic(nk_ctx, 30, 2);
+           if (nk_button_label(nk_ctx, "C - Enable"))
+               cull_backface = true;
+           if (nk_button_label(nk_ctx, "D - Disable"))
+               cull_backface = false;
+
+           /* ── Section: Live Status ── */
+           nk_layout_row_dynamic(nk_ctx, 10, 1);
+           nk_spacing(nk_ctx, 1);
+
+           nk_layout_row_dynamic(nk_ctx, 20, 1);
+           char status[64];
+           snprintf(status, sizeof(status),
+                    "Mode: %d  |  Cull: %s",
+                    (int)render_mode,
+                    cull_backface ? "ON" : "OFF");
+           nk_label(nk_ctx, status, NK_TEXT_LEFT);
+       }
+       nk_end(nk_ctx);
+
+       /* flush Nuklear draw commands on top of the 3D scene */
+       nk_sdl_render(NK_ANTI_ALIASING_ON);
+
+       /* flip — everything is now on screen */
+       SDL_RenderPresent(renderer);
+   }
+
+
 
 
 // free memory
@@ -220,6 +351,7 @@ void free_resources(void) {
     array_free(mesh.faces);
     array_free(mesh.vertices);
     free(color_buffer);
+    nk_sdl_shutdown();
 }
 
 

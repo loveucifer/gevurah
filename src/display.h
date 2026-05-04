@@ -21,6 +21,19 @@ extern SDL_Texture* color_buffer_texture;
 extern int window_width;
 extern int window_height;
 
+typedef enum {
+    RENDER_WIRE_VERTEX = 1,  // wireframe lines + dot per vertex
+    RENDER_WIRE = 2,           // wireframes lines only
+    RENDER_FILL = 3,            // filled triangles
+    RENDER_FILL_WIRE = 4,       // filled triangles + wireframe
+} render_mode_t;
+
+
+extern render_mode_t render_mode;
+extern bool cull_backface;
+
+
+
 bool init_window(void);
 void draw_grid(void);
 void draw_triangle(int x0 , int y0 , int x1 , int y1 , int x2 , int y2, uint32_t color);
