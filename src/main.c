@@ -61,8 +61,8 @@ void setup(void){
         window_height);
 
     // loads cube value into the mesh
-    //load_cube();
-    load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
+    load_cube();
+    // load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
 
 
 
@@ -216,21 +216,28 @@ void update(void){
             continue;
         }
 
-        triangle_t projected_triangle;
+
+
+
+        Vec2_t projected_point[3];
 
         for (int j = 0; j < 3; j++) {
-
-            Vec2_t projected_point = project(transformed_vertices[j]);
-            // scale and tranlate projected pointsss
-            projected_point.x += (window_width /2 );
-            projected_point.y += (window_height/ 2);
-            // transalte vertex away from camer
-            projected_triangle.points[j] = projected_point;
+            projected_point[j] = project(transformed_vertices[j]);
+            projected_point[j].x += (window_width / 2);
+            projected_point[j].y += (window_height / 2);
         }
-        // save the projected triangle in the array of traingles trying to render
+
+        triangle_t projected_triangle = {
+            .points = {
+                {projected_point[0].x, projected_point[0].y},
+                {projected_point[1].x, projected_point[1].y},
+                {projected_point[2].x, projected_point[2].y},
+            },
+            .color = mesh_face.color
+        };
         array_push(triangles_to_render, projected_triangle);
-     }
- }
+    }
+}
 
 void render(void){
 
@@ -250,7 +257,7 @@ void render(void){
           triangle.points[0].x, triangle.points[0].y,
           triangle.points[1].x, triangle.points[1].y,
           triangle.points[2].x, triangle.points[2].y,
-          0xFF1E3A5F
+          triangle.color
       );
      }
      if (render_method == RENDER_WIRE_VERTEX ||
