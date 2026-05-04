@@ -227,21 +227,30 @@ void update(void){
             projected_point[j].y += (window_height / 2);
         }
 
+        //calc the avg depth for each phase based on the vertices after transfromation
+        float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
+
+
         triangle_t projected_triangle = {
             .points = {
                 {projected_point[0].x, projected_point[0].y},
                 {projected_point[1].x, projected_point[1].y},
                 {projected_point[2].x, projected_point[2].y},
             },
-            .color = mesh_face.color
+            .color = mesh_face.color,
+            // neeed avg depth per triangle
+            .avg_depth = avg_depth
+
         };
         array_push(triangles_to_render, projected_triangle);
     }
+    // sort triangles to render by avg depth in ascending order
 }
 
 void render(void){
 
     // draw_grid();
+
     int no_of_triangles = array_length(triangles_to_render);
     for (int i = 0; i < no_of_triangles; i++) {
 
