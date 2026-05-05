@@ -149,10 +149,10 @@ void update(void){
    mesh.rotation.y += 0.01;
    mesh.rotation.z += 0.01;
 
-    //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
-    //mesh.scale.y += 0.001;
+    mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
+    mesh.scale.y += 0.001;
 
-    // mesh.translation.x += 0.01;
+     mesh.translation.x += 0.01;
     mesh.translation.z = 5.0;
 
     mat4_t scale_matrix = mat4_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -179,23 +179,26 @@ void update(void){
         for (int j = 0; j< 3; j++) {
             Vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
+            /// world matrix is basically the multiplication of all other matrices
+            mat4_t world_matrix = mat4_identity();
 
-            // there is order to matrix so we have to scale first , then rotate then translate
+            world_matrix = mat4_t_mul_mat4(scale_matrix, world_matrix);
+            world_matrix = mat4_t_mul_mat4(rotation_matrix_z, world_matrix);
+            world_matrix = mat4_t_mul_mat4(rotation_matrix_y, world_matrix);
+            world_matrix = mat4_t_mul_mat4(rotation_matrix_x, world_matrix);
+            world_matrix = mat4_t_mul_mat4(translation_matrix, world_matrix);
 
-            /// multiply scale by vertex
-          transformed_vertex =  mat4_mul_vec4(scale_matrix, transformed_vertex);
+            transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
 
-
+        // there is order to matrix so we have to scale first , then rotate then translate
+        /// multiply scale by vertex
+         /* transformed_vertex =  mat4_mul_vec4(scale_matrix, transformed_vertex);
           // multiply rotation by vertex
-
           transformed_vertex =  mat4_mul_vec4(rotation_matrix_x, transformed_vertex);
           transformed_vertex =  mat4_mul_vec4(rotation_matrix_y, transformed_vertex);
           transformed_vertex =  mat4_mul_vec4(rotation_matrix_z, transformed_vertex);
-
           /// multiply translation by vertex
-          transformed_vertex =  mat4_mul_vec4(translation_matrix, transformed_vertex);
-
-
+          transformed_vertex =  mat4_mul_vec4(translation_matrix, transformed_vertex); */
 
 
           // diff
