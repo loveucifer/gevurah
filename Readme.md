@@ -31,6 +31,13 @@ make run
 - [ScratchPixel](scratchapixel.com)
 - [C Programming A Modern Approach](https://archive.org/details/c-programming-a-modern-approach-2nd-ed-c-89-c-99-king-by)
 
+## Screenshots
+
+<p align="center">
+  <img src="./assets/filled.png" alt="Filled" width="700">
+  <img src="./assets/wireframe.png" alt="Wireframe" width="700">
+</p>
+
 ## License
 
 MIT

@@ -144,19 +144,24 @@ void update(void){
     // initalize the array of triangles to render
     triangles_to_render = NULL;
 
-    //mesh.rotation.y += 0.01;
-    //mesh.rotation.x += 0.01;
-    //mesh.rotation.z += 0.01;
+
+   mesh.rotation.x += 0.01;
+   mesh.rotation.y += 0.01;
+   mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
 
-    mesh.translation.x += 0.01;
+    // mesh.translation.x += 0.01;
     mesh.translation.z = 5.0;
 
     mat4_t scale_matrix = mat4_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
 
     mat4_t translation_matrix = mat4_translaton(mesh.translation.x , mesh.translation.y , mesh.translation.z );
+
+    mat4_t rotation_matrix_x = mat4_rotation_x (mesh.rotation.x );
+    mat4_t rotation_matrix_y = mat4_rotation_y (mesh.rotation.y );
+    mat4_t rotation_matrix_z = mat4_rotation_z (mesh.rotation.z );
 
     int num_faces = array_length(mesh.faces);
 
@@ -174,11 +179,24 @@ void update(void){
         for (int j = 0; j< 3; j++) {
             Vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
+
+            // there is order to matrix so we have to scale first , then rotate then translate
+
             /// multiply scale by vertex
           transformed_vertex =  mat4_mul_vec4(scale_matrix, transformed_vertex);
 
+
+          // multiply rotation by vertex
+
+          transformed_vertex =  mat4_mul_vec4(rotation_matrix_x, transformed_vertex);
+          transformed_vertex =  mat4_mul_vec4(rotation_matrix_y, transformed_vertex);
+          transformed_vertex =  mat4_mul_vec4(rotation_matrix_z, transformed_vertex);
+
           /// multiply translation by vertex
           transformed_vertex =  mat4_mul_vec4(translation_matrix, transformed_vertex);
+
+
+
 
           // diff
             /*transformed_vertex = Vec3_rotate_x(transformed_vertex, mesh.rotation.x);
