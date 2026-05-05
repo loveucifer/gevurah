@@ -8,7 +8,9 @@
 mesh_t mesh = {
     .vertices = NULL,
     .faces = NULL,
-    .rotation = {0,0,0,}
+    .rotation = {0,0,0,},
+    .scale = {1.0,1.0,1.0},
+    .translation =  {0,0,0}
 };
 
 
@@ -76,8 +78,6 @@ void load_obj_file(char* filename){
         }
 
     // face info
-    //
-    //
         if (strncmp(line ,"f ",2) == 0){
 
             int vertex_indices[3];

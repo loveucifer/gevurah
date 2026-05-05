@@ -4,6 +4,11 @@
 
 // this is very bad practice ngl
 
+
+////////////////////////////////////
+////// vec2 ///////////////////////
+//////////////////////////////////
+
 float vec2_len(Vec2_t v){
     return sqrt(v.x * v.x + v.y * v.y );
 };
@@ -54,7 +59,7 @@ void vec2_normalize(Vec2_t *v){
 
 ///////////////////////////////////////
 //// vec3 ////////////////////////////
-// //////////////////////////////////
+/////////////////////////////////////
 
 float vec3_len(Vec3_t v){
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -117,13 +122,6 @@ void vec3_normalize(Vec3_t *v){
     v->z /= length;
 }
 
-
-
-
-
-
-
-
 Vec3_t Vec3_rotate_x(Vec3_t v, float angle) {
   Vec3_t rotated_vector = {.x = v.x,
                            .y = v.y * cos(angle) - v.z * sin(angle),
@@ -143,4 +141,20 @@ Vec3_t Vec3_rotate_z(Vec3_t v, float angle) {
                            .y = v.x * sin(angle) + v.y * cos(angle),
                            .z = v.z};
   return rotated_vector;
+}
+
+
+/*///////////////////////////////////////////////
+////// VECTOR CONVERSIONS////////////////////////
+//////////////////////////////////////////////*/
+
+
+Vec4_t vec4_from_vec3(Vec3_t v){
+    Vec4_t result = {v.x , v.y , v.z, 1.0};
+    return result;
+}
+
+Vec3_t vec3_from_vec4(Vec4_t v){
+    Vec3_t result = {v.x , v.y , v.z};
+    return result;
 }

@@ -15,6 +15,13 @@ typedef struct{
     float z;
 } Vec3_t;
 
+typedef struct{
+    float x;
+    float y;
+    float z;
+    float w;
+} Vec4_t;
+
 // 2d VECTOR functions
 float vec2_len(Vec2_t v);
 Vec2_t vec2_add(Vec2_t a , Vec2_t b);
@@ -42,5 +49,10 @@ Vec3_t vec3_cross(Vec3_t a , Vec3_t b);
 float  vec3_dot(Vec3_t a , Vec3_t b);
 void vec3_normalize (Vec3_t* v);
 
+
+
+//vector conversion functions
+Vec4_t vec4_from_vec3(Vec3_t v);
+Vec3_t vec3_from_vec4(Vec4_t v);
 
 #endif

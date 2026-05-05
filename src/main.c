@@ -25,6 +25,7 @@
 #include "mesh.h"
 #include "triangle.h"
 #include "array.h"
+#include "matrix.h"
 
 triangle_t* triangles_to_render = NULL;
 
@@ -61,8 +62,8 @@ void setup(void){
         window_height);
 
     // loads cube value into the mesh
-    // load_cube();
-     load_obj_file("./models/eyes.obj");    // hardcoded the path use as you wish
+     load_cube();
+    // load_obj_file("./models/eyes.obj");    // hardcoded the path use as you wish
 
 
 
@@ -143,9 +144,19 @@ void update(void){
     // initalize the array of triangles to render
     triangles_to_render = NULL;
 
-    mesh.rotation.y += 0.01;
-    mesh.rotation.x += 0.01;
-    mesh.rotation.z += 0.01;
+    //mesh.rotation.y += 0.01;
+    //mesh.rotation.x += 0.01;
+    //mesh.rotation.z += 0.01;
+
+    //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
+    //mesh.scale.y += 0.001;
+
+    mesh.translation.x += 0.01;
+    mesh.translation.z = 5.0;
+
+    mat4_t scale_matrix = mat4_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+
+    mat4_t translation_matrix = mat4_translaton(mesh.translation.x , mesh.translation.y , mesh.translation.z );
 
     int num_faces = array_length(mesh.faces);
 
@@ -156,37 +167,37 @@ void update(void){
         face_vertices[0] = mesh.vertices[mesh_face.a - 1];
         face_vertices[1] = mesh.vertices[mesh_face.b - 1];
         face_vertices[2] = mesh.vertices[mesh_face.c - 1];
-
-
-
         // triangle_t projected_triangle;
         // loop all three vertices of this face and transofrm them
-
-
-        Vec3_t transformed_vertices[3];
-
-
+        Vec4_t transformed_vertices[3];
 
         for (int j = 0; j< 3; j++) {
-            Vec3_t transformed_vertex = face_vertices[j];
+            Vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
+            /// multiply scale by vertex
+          transformed_vertex =  mat4_mul_vec4(scale_matrix, transformed_vertex);
 
-            transformed_vertex = Vec3_rotate_x(transformed_vertex, mesh.rotation.x);
+          /// multiply translation by vertex
+          transformed_vertex =  mat4_mul_vec4(translation_matrix, transformed_vertex);
+
+          // diff
+            /*transformed_vertex = Vec3_rotate_x(transformed_vertex, mesh.rotation.x);
             transformed_vertex = Vec3_rotate_y(transformed_vertex, mesh.rotation.y);
-            transformed_vertex = Vec3_rotate_z(transformed_vertex, mesh.rotation.z);
+            transformed_vertex = Vec3_rotate_z(transformed_vertex, mesh.rotation.z);*/
+            // diff
 
-            transformed_vertex.z += 5;
+            // transformed_vertex.z += 5;
 
-            transformed_vertices[j] = transformed_vertex;
+            transformed_vertices[j] = (transformed_vertex);
         }
 
         /////////////////////////////////
         ///// backface culling     //////
         /////////////////////////////////
 
-        Vec3_t vector_a = transformed_vertices[0];
-        Vec3_t vector_b = transformed_vertices[1];
-        Vec3_t vector_c = transformed_vertices[2];
+        Vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]);
+        Vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]);
+        Vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]);
 
         Vec3_t vector_ab = vec3_sub(vector_b, vector_a);
         Vec3_t vector_ac = vec3_sub(vector_c, vector_a);
@@ -222,7 +233,7 @@ void update(void){
         Vec2_t projected_point[3];
 
         for (int j = 0; j < 3; j++) {
-            projected_point[j] = project(transformed_vertices[j]);
+            projected_point[j] = project(vec3_from_vec4(transformed_vertices[j]));
             projected_point[j].x += (window_width / 2);
             projected_point[j].y += (window_height / 2);
         }
@@ -247,7 +258,7 @@ void update(void){
     // sort triangles to render by avg depth in ascending order
     int num_triangles = array_length(triangles_to_render);
     for(int i = 0; i < num_triangles ; i++){
-        for (int j = 0; j < num_triangles; j++){
+        for (int j = i; j < num_triangles; j++){
             if (triangles_to_render[i].avg_depth < triangles_to_render[j].avg_depth) {
                 triangle_t temp = triangles_to_render[i];
                 triangles_to_render[i] = triangles_to_render[j];
