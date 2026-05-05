@@ -61,8 +61,8 @@ void setup(void){
         window_height);
 
     // loads cube value into the mesh
-    load_cube();
-    // load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
+    // load_cube();
+     load_obj_file("./models/eyes.obj");    // hardcoded the path use as you wish
 
 
 
