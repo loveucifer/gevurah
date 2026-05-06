@@ -27,6 +27,8 @@
 #include "triangle.h"
 #include "array.h"
 #include "matrix.h"
+#include "light.h"
+
 
 triangle_t* triangles_to_render = NULL;
 
@@ -71,8 +73,8 @@ void setup(void){
 
 
     // loads cube value into the mesh
-     load_cube();
-    // load_obj_file("./models/eyes.obj");    // hardcoded the path use as you wish
+     //load_cube();
+     load_obj_file("./models/diabo.obj");    // hardcoded the path use as you wish
 
 
 
@@ -143,8 +145,8 @@ void update(void){
 
 
    mesh.rotation.x += 0.01;
-   //mesh.rotation.y += 0.01;
-   //mesh.rotation.z += 0.01;
+   mesh.rotation.y += 0.01;
+   mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
@@ -263,13 +265,27 @@ void update(void){
         float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
 
 
+        //////////////////////////////////////////////////
+        /////////// light calculation ///////////////////
+        ////////////////////////////////////////////////
+
+         // calc the shade intensity based on how aligned the normal is to the inverse of light ray
+        float light_intensity_factor = -vec3_dot(normal,light.direction);
+
+
+
+        // calculate triangle color based on the light
+
+        uint32_t triangle_color = light_intensity_apply(mesh_face.color, light_intensity_factor);
+
+
         triangle_t projected_triangle = {
             .points = {
                 {projected_point[0].x, projected_point[0].y},
                 {projected_point[1].x, projected_point[1].y},
                 {projected_point[2].x, projected_point[2].y},
             },
-            .color = mesh_face.color,
+            .color = triangle_color,
             // neeed avg depth per triangle
             .avg_depth = avg_depth
 
@@ -299,9 +315,7 @@ void render(void){
 
       triangle_t triangle = triangles_to_render[i];
 
-      draw_rec(triangle.points[0].x, triangle.points[0].y, 3, 3, 0xFF800080);
-      draw_rec(triangle.points[1].x, triangle.points[1].y, 3, 3, 0xFF800080);
-      draw_rec(triangle.points[2].x, triangle.points[2].y, 3, 3, 0xFF800080);
+
 
 
      if (render_method == RENDER_FILL || render_method == RENDER_FILL_WIRE) {
