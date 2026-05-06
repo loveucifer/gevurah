@@ -151,7 +151,7 @@ void update(void){
     triangles_to_render = NULL;
 
 
-   mesh.rotation.x += 0.01;
+   // mesh.rotation.x += 0.01;
    //mesh.rotation.y += 0.01;
    //mesh.rotation.z += 0.01;
 
@@ -296,9 +296,9 @@ void update(void){
                 {projected_point[2].x, projected_point[2].y},
             },
             .tex_cordinates = {
-                    {mesh_face.a_uv.u , mesh_face.a_uv.u},
-                    {mesh_face.b_uv.u , mesh_face.b_uv.u},
-                    {mesh_face.c_uv.u , mesh_face.c_uv.u},
+                    {mesh_face.a_uv.u , mesh_face.a_uv.v},
+                    {mesh_face.b_uv.u , mesh_face.b_uv.v},
+                    {mesh_face.c_uv.u , mesh_face.c_uv.v},
             },
             .color = triangle_color,
             // neeed avg depth per triangle
