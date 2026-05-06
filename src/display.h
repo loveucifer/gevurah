@@ -25,7 +25,9 @@ enum {
     RENDER_WIRE_VERTEX,  // wireframe lines + dot per vertex
     RENDER_WIRE,           // wireframes lines only
     RENDER_FILL,            // filled triangles
-    RENDER_FILL_WIRE,       // filled triangles + wireframe
+    RENDER_FILL_WIRE,    // filled triangles + wireframe
+    RENDER_TEXTURED, // texture addition
+    RENDER_TEXTURE_WIRE, // wirframer texture
 } render_method;
 
 enum {

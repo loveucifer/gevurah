@@ -28,6 +28,7 @@
 #include "array.h"
 #include "matrix.h"
 #include "light.h"
+#include "texture.h"
 
 
 triangle_t* triangles_to_render = NULL;
@@ -71,10 +72,14 @@ void setup(void){
     float zfar = 100.0;
     projection_matrix = mat4_perspective( fov,  aspect,  znear,  zfar);
 
+    // load hardcoded texture data from the static arrray
+    mesh_texture = (uint32_t* ) REDBRICK_TEXTURE ;
+    texture_height = 64;
+    texture_width = 64;
 
     // loads cube value into the mesh
-     //load_cube();
-     load_obj_file("./models/diabo.obj");    // hardcoded the path use as you wish
+     load_cube();
+    // load_obj_file("./models/diabo.obj");    // hardcoded the path use as you wish
 
 
 
@@ -126,6 +131,8 @@ void process_input(void){
             if (event.key.keysym.sym == SDLK_2) render_method = RENDER_WIRE;
             if (event.key.keysym.sym == SDLK_3) render_method = RENDER_FILL;
             if (event.key.keysym.sym == SDLK_4) render_method = RENDER_FILL_WIRE;
+            if (event.key.keysym.sym == SDLK_5) render_method = RENDER_TEXTURED;
+            if (event.key.keysym.sym == SDLK_5) render_method = RENDER_TEXTURE_WIRE;
             if (event.key.keysym.sym == SDLK_c) cull_method = CULL_BACKFACE;
             if (event.key.keysym.sym == SDLK_d) cull_method = CULL_NONE;
         break;
@@ -145,8 +152,8 @@ void update(void){
 
 
    mesh.rotation.x += 0.01;
-   mesh.rotation.y += 0.01;
-   mesh.rotation.z += 0.01;
+   //mesh.rotation.y += 0.01;
+   //mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
@@ -288,6 +295,11 @@ void update(void){
                 {projected_point[1].x, projected_point[1].y},
                 {projected_point[2].x, projected_point[2].y},
             },
+            .tex_cordinates = {
+                    {mesh_face.a_uv.u , mesh_face.a_uv.u},
+                    {mesh_face.b_uv.u , mesh_face.b_uv.u},
+                    {mesh_face.c_uv.u , mesh_face.c_uv.u},
+            },
             .color = triangle_color,
             // neeed avg depth per triangle
             .avg_depth = avg_depth
@@ -319,8 +331,6 @@ void render(void){
       triangle_t triangle = triangles_to_render[i];
 
 
-
-
      if (render_method == RENDER_FILL || render_method == RENDER_FILL_WIRE) {
       draw_filled_triangle(
           triangle.points[0].x, triangle.points[0].y,
@@ -329,9 +339,22 @@ void render(void){
           triangle.color
       );
      }
+
+     // draw textured triangle
+     if (render_method == RENDER_TEXTURED || render_method == RENDER_TEXTURE_WIRE){
+         draw_textured_triangle(
+             triangle.points[0].x, triangle.points[0].y, triangle.tex_cordinates[0].u  , triangle.tex_cordinates[0].v, // vertex a
+             triangle.points[1].x, triangle.points[1].y,triangle.tex_cordinates[1].u , triangle.tex_cordinates[1].v, // vertex b
+             triangle.points[2].x, triangle.points[2].y, triangle.tex_cordinates[2].u  , triangle.tex_cordinates[2].v, // vertex c
+             mesh_texture);
+
+     }
+
      if (render_method == RENDER_WIRE_VERTEX ||
          render_method == RENDER_WIRE        ||
+         render_method == RENDER_TEXTURE_WIRE ||
          render_method == RENDER_FILL_WIRE) {
+
       // draw an unfilled trinalge it looks ugly without it
       draw_triangle(
           triangle.points[0].x, triangle.points[0].y,
@@ -340,6 +363,7 @@ void render(void){
           0xFF00FF00
       );
       }
+
      if (render_method == RENDER_WIRE_VERTEX) {
          draw_rec(triangle.points[0].x - 2, triangle.points[0].y - 2, 5, 5, 0xFFFF0000);
          draw_rec(triangle.points[1].x - 2, triangle.points[1].y - 2, 5, 5, 0xFFFF0000);
@@ -383,6 +407,14 @@ void render(void){
            nk_layout_row_dynamic(nk_ctx, 30, 1);
            if (nk_button_label(nk_ctx, "4 - Filled + Wireframe"))
                render_method = RENDER_FILL_WIRE;
+
+           nk_layout_row_dynamic(nk_ctx, 30, 1);
+           if (nk_button_label(nk_ctx, "5 - Textured"))
+               render_method = RENDER_TEXTURED;
+
+           nk_layout_row_dynamic(nk_ctx, 30, 1);
+           if (nk_button_label(nk_ctx, "6 - Textured Wire"))
+               render_method = RENDER_TEXTURE_WIRE;
 
            /* ── Section: Back-face Culling ── */
            nk_layout_row_dynamic(nk_ctx, 10, 1);
