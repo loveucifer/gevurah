@@ -1,9 +1,13 @@
 #include "mesh.h"
+#include "texture.h"
 #include "triangle.h"
 #include "vector.h"
 #include "array.h"
 #include <string.h>
 #include <stdio.h>
+
+
+tex2_t* tex_coordinates;
 
 mesh_t mesh = {
     .vertices = NULL,
@@ -64,39 +68,45 @@ void load_cube (void){
 }
 
 
-void load_obj_file(char* filename){
-    FILE* file;
-    file = fopen(filename, "r");
+
+void load_obj_file(char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (!file) { fprintf(stderr, "Failed to open %s\n", filename); return; }
+
     char line[1024];
+    tex2_t* texcoords = NULL;  // local only, freed at end
 
-    // vertex info
-
-    while (fgets(line,1024, file)){
-        if (strncmp(line , "v ", 2)==0){
+    while (fgets(line, 1024, file)) {
+        if (strncmp(line, "v ", 2) == 0) {
             Vec3_t vertex;
-            sscanf(line,"v %f %f %f ", &vertex.x , &vertex.y , &vertex.z);
+            sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
             array_push(mesh.vertices, vertex);
         }
-
-    // face info
-        if (strncmp(line ,"f ",2) == 0){
-
-            int vertex_indices[3];
-            int texture_indices[3];
-            int normal_indices[3];
+        if (strncmp(line, "vt ", 3) == 0) {
+            tex2_t texcoord;
+            sscanf(line, "vt %f %f", &texcoord.u, &texcoord.v);
+            array_push(texcoords, texcoord);  // fixed semicolon
+        }
+        if (strncmp(line, "f ", 2) == 0) {
+            int vertex_indices[3], texture_indices[3], normal_indices[3];
             sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d",
                 &vertex_indices[0], &texture_indices[0], &normal_indices[0],
                 &vertex_indices[1], &texture_indices[1], &normal_indices[1],
                 &vertex_indices[2], &texture_indices[2], &normal_indices[2]);
-        face_t face = {
-            .a = vertex_indices[0],
-            .b = vertex_indices[1],
-            .c = vertex_indices[2],
-            .color = 0xFFFFFFFF
 
-        };
-
-        array_push(mesh.faces, face);
+            face_t face = {
+                .a = vertex_indices[0] - 1,
+                .b = vertex_indices[1] - 1,
+                .c = vertex_indices[2] - 1,
+                .a_uv = texcoords[texture_indices[0] - 1],
+                .b_uv = texcoords[texture_indices[1] - 1],
+                .c_uv = texcoords[texture_indices[2] - 1],
+                .color = 0xFFFFFFFF
+            };
+            array_push(mesh.faces, face);
+        }
     }
-}
+
+    array_free(texcoords);  // ← inside the function, after the loop
+    fclose(file);           // ← you were also never closing the file!
 }

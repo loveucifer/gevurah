@@ -53,7 +53,6 @@ struct nk_context *nk_ctx = NULL;
 
 void setup(void){
 
-
     render_method = RENDER_WIRE;
     cull_method = CULL_BACKFACE;
 
@@ -79,11 +78,11 @@ void setup(void){
     texture_width = 64;  */
 
     // loads cube value into the mesh
-     load_cube();
-    // load_obj_file("./models/diabo.obj");    // hardcoded the path use as you wish
+     //load_cube();
+    load_obj_file("./models/human.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/cube.png");
+    load_png_texture("./models/sphere.png");
 
 
 
@@ -155,9 +154,9 @@ void update(void){
     triangles_to_render = NULL;
 
 
-// mesh.rotation.x += 0.01;
+ //mesh.rotation.x += 0.01;
    mesh.rotation.y += 0.01;
-  // mesh.rotation.z += 0.01;
+   //mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
@@ -179,9 +178,9 @@ void update(void){
         face_t mesh_face = mesh.faces[i];
 
         Vec3_t face_vertices[3];
-        face_vertices[0] = mesh.vertices[mesh_face.a - 1];
-        face_vertices[1] = mesh.vertices[mesh_face.b - 1];
-        face_vertices[2] = mesh.vertices[mesh_face.c - 1];
+        face_vertices[0] = mesh.vertices[mesh_face.a ];
+        face_vertices[1] = mesh.vertices[mesh_face.b ];
+        face_vertices[2] = mesh.vertices[mesh_face.c ];
         // triangle_t projected_triangle;
         // loop all three vertices of this face and transofrm them
         Vec4_t transformed_vertices[3];
@@ -464,7 +463,6 @@ void free_resources(void) {
     upng_free(png_texture);
     array_free(mesh.faces);
     array_free(mesh.vertices);
-    free(mesh_texture);
     nk_sdl_shutdown();
 }
 
