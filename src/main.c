@@ -1,4 +1,5 @@
 /*  Nuklear config */
+#include "upng.h"
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
@@ -59,7 +60,7 @@ void setup(void){
     color_buffer = (uint32_t*)malloc(sizeof(uint32_t)* window_width * window_height);
     color_buffer_texture = SDL_CreateTexture(
         renderer,
-        SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_RGBA32,
         SDL_TEXTUREACCESS_STREAMING,
         window_width,
         window_height);
@@ -73,13 +74,16 @@ void setup(void){
     projection_matrix = mat4_perspective( fov,  aspect,  znear,  zfar);
 
     // load hardcoded texture data from the static arrray
-    mesh_texture = (uint32_t* ) REDBRICK_TEXTURE ;
+   /* mesh_texture = (uint32_t* ) REDBRICK_TEXTURE ;
     texture_height = 64;
-    texture_width = 64;
+    texture_width = 64;  */
 
     // loads cube value into the mesh
      load_cube();
     // load_obj_file("./models/diabo.obj");    // hardcoded the path use as you wish
+
+
+    load_png_texture("./models/cube.png");
 
 
 
@@ -151,8 +155,8 @@ void update(void){
     triangles_to_render = NULL;
 
 
-    // mesh.rotation.x += 0.01;
-  // mesh.rotation.y += 0.01;
+// mesh.rotation.x += 0.01;
+   mesh.rotation.y += 0.01;
   // mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
@@ -456,9 +460,11 @@ void render(void){
 // free memory
 
 void free_resources(void) {
+    free(color_buffer);
+    upng_free(png_texture);
     array_free(mesh.faces);
     array_free(mesh.vertices);
-    free(color_buffer);
+    free(mesh_texture);
     nk_sdl_shutdown();
 }
 
