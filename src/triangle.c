@@ -146,7 +146,18 @@ void draw_texel(
     int tex_x = abs((int)(interpolated_u * texture_width) % texture_width);
     int tex_y = abs((int)(interpolated_v * texture_height)% texture_height);
 
+     // adjusting 1/w so pixels are closer to the camera  have smaller values
+     interpolated_reciprocal_of_w = 1.0 - interpolated_reciprocal_of_w;
+
+    // only draw pixel if depth value is less than the one stored in previously in z buffer
+    if (interpolated_reciprocal_of_w < z_buffer [ (window_width * y)+ x ]) {
+    // draw pixel at position x y with the clr that comes from mapped texture
     draw_pixel(x, y, texture[(texture_width * tex_y) + tex_x]);
+
+    // update z buffer value with  1/w of current pixel
+    z_buffer[(window_width * y)+x] = interpolated_reciprocal_of_w;
+
+     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

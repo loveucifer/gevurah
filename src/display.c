@@ -2,12 +2,14 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 // its objectively better to start these pointers as NULL because they only have value when they are passed in
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 uint32_t* color_buffer = NULL;
+float* z_buffer = NULL;
 SDL_Texture* color_buffer_texture = NULL;
 
 int window_width = 1280;
@@ -155,6 +157,15 @@ void clear_color_buffer(uint32_t color){
     for (int y = 0; y < window_height; y++ ){
         for (int x =0; x< window_width; x++) {
             color_buffer[(window_width *y) + x]  = color;
+
+        }
+    }
+}
+
+void clear_z_buffer( void ){
+    for (int y = 0; y < window_height; y++ ){
+        for (int x =0; x< window_width; x++) {
+            z_buffer[(window_width *y) + x]  = 1.0;
 
         }
     }

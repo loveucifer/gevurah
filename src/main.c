@@ -56,7 +56,9 @@ void setup(void){
     render_method = RENDER_WIRE;
     cull_method = CULL_BACKFACE;
 
+    // allocate the required memory in bytes to hold the color and the z buffer
     color_buffer = (uint32_t*)malloc(sizeof(uint32_t)* window_width * window_height);
+    z_buffer = (float *)malloc(sizeof(float)*window_width * window_height);
     color_buffer_texture = SDL_CreateTexture(
         renderer,
         SDL_PIXELFORMAT_RGBA32,
@@ -79,10 +81,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/human.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/f117.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/sphere.png");
+    load_png_texture("./models/f117.png");
 
 
 
@@ -135,7 +137,7 @@ void process_input(void){
             if (event.key.keysym.sym == SDLK_3) render_method = RENDER_FILL;
             if (event.key.keysym.sym == SDLK_4) render_method = RENDER_FILL_WIRE;
             if (event.key.keysym.sym == SDLK_5) render_method = RENDER_TEXTURED;
-            if (event.key.keysym.sym == SDLK_5) render_method = RENDER_TEXTURE_WIRE;
+            if (event.key.keysym.sym == SDLK_6) render_method = RENDER_TEXTURE_WIRE;
             if (event.key.keysym.sym == SDLK_c) cull_method = CULL_BACKFACE;
             if (event.key.keysym.sym == SDLK_d) cull_method = CULL_NONE;
         break;
@@ -380,6 +382,7 @@ void render(void){
 
     render_color_buffer();
     clear_color_buffer(0XFF000000);
+    clear_z_buffer();
 
 
     /* ─────────────────────────────────────────────────────
@@ -460,6 +463,7 @@ void render(void){
 
 void free_resources(void) {
     free(color_buffer);
+    free(z_buffer);
     upng_free(png_texture);
     array_free(mesh.faces);
     array_free(mesh.vertices);
