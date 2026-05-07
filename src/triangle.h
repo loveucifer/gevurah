@@ -34,12 +34,9 @@ void draw_texel(
     Vec4_t point_a,
     Vec4_t point_b,
     Vec4_t point_c,
-    float u0 ,
-    float v0 ,
-    float u1 ,
-    float v1,
-    float u2 ,
-    float v2 );
+    tex2_t a_uv ,
+   tex2_t b_uv ,
+   tex2_t  c_uv);
 
 void draw_textured_triangle(
     int x0, int y0,float z0 , float w0, float u0, float v0,

@@ -2,6 +2,7 @@
 #include "display.h"
 #include <stdint.h>
 #include "swap.h"
+#include "texture.h"
 #include "vector.h"
 
 void fill_flat_bottom(int x0 , int y0 , int x1 , int y1 , int x2 , int y2 , uint32_t color  ){
@@ -108,7 +109,7 @@ Vec3_t barycentric_weights(Vec2_t a, Vec2_t b, Vec2_t c, Vec2_t p) {
 void draw_texel(
     int x, int y, uint32_t* texture,
     Vec4_t point_a, Vec4_t point_b, Vec4_t point_c,
-    float u0, float v0, float u1, float v1, float u2, float v2
+    tex2_t a_uv , tex2_t  b_uv , tex2_t c_uv
 ) {
     Vec2_t p = { x, y };
     Vec2_t a = vec2_from_vec4(point_a);
@@ -130,8 +131,8 @@ void draw_texel(
 
     // Perform the interpolation of all U and V values using barycentric weights // before we used to do this
     // // Perform the interpolation of all U and V values using barycentric weights // now we should do U/W and V/W and a factor of 1/w
-   interpolated_u = (u0/point_a.w) * alpha + (u1/point_b.w) * beta + (u2/point_c.w) * gamma;
-   interpolated_v = (v0/point_a.w) * alpha + (v1/point_b.w) * beta + (v2/point_c.w) * gamma;
+   interpolated_u = (a_uv.u/point_a.w) * alpha + (b_uv.u/point_b.w) * beta + (c_uv.u/point_c.w) * gamma;
+   interpolated_v = (a_uv.v/point_a.w) * alpha + (b_uv.v/point_b.w) * beta + (c_uv.v/point_c.w) * gamma;
 
    // interpolate value of 1/w for current pixel
 
@@ -204,6 +205,9 @@ void draw_textured_triangle(
         Vec4_t point_a = {x0,y0,z0,w0};
         Vec4_t point_b = {x1,y1,z1,w1};
         Vec4_t point_c = {x2,y2,z2,w2};
+        tex2_t a_uv = {u0 , v0};
+        tex2_t b_uv = {u1 , v1};
+        tex2_t c_uv = {u2 , v2};
 
         // render upper part of triangle (flat-bottom half)
         float inv_slope1 = 0;
@@ -223,7 +227,7 @@ void draw_textured_triangle(
 
                 for (int x = x_start; x < x_end; x++) {
 
-                    draw_texel( x,  y, texture, point_a,  point_b,  point_c,  u0,  v0,  u1, v1, u2,  v2);
+                    draw_texel( x,  y, texture, point_a,  point_b,  point_c, a_uv , b_uv , c_uv );
 
                 }
             }
@@ -247,7 +251,7 @@ void draw_textured_triangle(
 
                 for (int x = x_start; x < x_end; x++) {
 
-                    draw_texel( x,  y, texture, point_a,  point_b,  point_c,  u0,  v0,  u1, v1, u2,  v2);
+                    draw_texel( x,  y, texture, point_a,  point_b,  point_c,  a_uv , b_uv , c_uv );
                 }
             }
         }
