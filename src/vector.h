@@ -54,5 +54,6 @@ void vec3_normalize (Vec3_t* v);
 //vector conversion functions
 Vec4_t vec4_from_vec3(Vec3_t v);
 Vec3_t vec3_from_vec4(Vec4_t v);
+Vec2_t vec2_from_vec4(Vec4_t v);
 
 #endif

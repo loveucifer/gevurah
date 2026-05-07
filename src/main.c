@@ -151,9 +151,9 @@ void update(void){
     triangles_to_render = NULL;
 
 
-   // mesh.rotation.x += 0.01;
-   //mesh.rotation.y += 0.01;
-   //mesh.rotation.z += 0.01;
+    mesh.rotation.x += 0.01;
+   mesh.rotation.y += 0.01;
+   mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
@@ -291,9 +291,9 @@ void update(void){
 
         triangle_t projected_triangle = {
             .points = {
-                {projected_point[0].x, projected_point[0].y},
-                {projected_point[1].x, projected_point[1].y},
-                {projected_point[2].x, projected_point[2].y},
+                {projected_point[0].x, projected_point[0].y, projected_point[0].z, projected_point[0].w},
+                {projected_point[1].x, projected_point[1].y, projected_point[1].z, projected_point[1].w},
+                {projected_point[2].x, projected_point[2].y, projected_point[2].z, projected_point[2].w},
             },
             .tex_cordinates = {
                     {mesh_face.a_uv.u , mesh_face.a_uv.v},
@@ -343,9 +343,9 @@ void render(void){
      // draw textured triangle
      if (render_method == RENDER_TEXTURED || render_method == RENDER_TEXTURE_WIRE){
          draw_textured_triangle(
-             triangle.points[0].x, triangle.points[0].y, triangle.tex_cordinates[0].u  , triangle.tex_cordinates[0].v, // vertex a
-             triangle.points[1].x, triangle.points[1].y,triangle.tex_cordinates[1].u , triangle.tex_cordinates[1].v, // vertex b
-             triangle.points[2].x, triangle.points[2].y, triangle.tex_cordinates[2].u  , triangle.tex_cordinates[2].v, // vertex c
+             triangle.points[0].x, triangle.points[0].y, triangle.points[0].z, triangle.points[0].w,triangle.tex_cordinates[0].u, triangle.tex_cordinates[0].v, // vertex a
+             triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w,triangle.tex_cordinates[1].u , triangle.tex_cordinates[1].v, // vertex b
+             triangle.points[2].x, triangle.points[2].y, triangle.points[2].z, triangle.points[2].w,triangle.tex_cordinates[2].u  ,triangle.tex_cordinates[2].v, // vertex c
              mesh_texture);
 
      }
