@@ -151,9 +151,9 @@ void update(void){
     triangles_to_render = NULL;
 
 
-    mesh.rotation.x += 0.01;
-   mesh.rotation.y += 0.01;
-   mesh.rotation.z += 0.01;
+    // mesh.rotation.x += 0.01;
+  // mesh.rotation.y += 0.01;
+  // mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
