@@ -86,10 +86,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/drone.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/cat.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/drone.png");
+    //load_png_texture("./models/drone.png");
 
 
 
@@ -144,7 +144,21 @@ void process_input(void){
             if (event.key.keysym.sym == SDLK_5) render_method = RENDER_TEXTURED;
             if (event.key.keysym.sym == SDLK_6) render_method = RENDER_TEXTURE_WIRE;
             if (event.key.keysym.sym == SDLK_c) cull_method = CULL_BACKFACE;
-            if (event.key.keysym.sym == SDLK_d) cull_method = CULL_NONE;
+            if (event.key.keysym.sym == SDLK_q) cull_method = CULL_NONE;
+            if (event.key.keysym.sym == SDLK_a) camera.yaw += 1.0 * delta_time;  // left
+            if (event.key.keysym.sym == SDLK_d) camera.yaw -= 1.0 * delta_time; // right
+            if (event.key.keysym.sym == SDLK_UP) camera.position.y += 2.0 * delta_time;  // up
+            if (event.key.keysym.sym == SDLK_DOWN) camera.position.y -= 2.0 * delta_time; // down
+
+
+            if (event.key.keysym.sym == SDLK_w){
+                camera.forward_velocity = vec3_mul(camera.direction,5.0 * delta_time);
+                camera.position = vec3_add(camera.position, camera.forward_velocity);
+            }
+            if (event.key.keysym.sym == SDLK_s){
+                camera.forward_velocity = vec3_mul(camera.direction,5.0 * delta_time);
+                camera.position = vec3_sub(camera.position, camera.forward_velocity);
+            } // backward
         break;
 
     }
@@ -164,26 +178,26 @@ void update(void){
     // initalize the array of triangles to render
     num_triangles_to_render = 0;
 
-    mesh.rotation.x += 0.006 *delta_time;
-    mesh.rotation.y += 0.000 *delta_time;
-    mesh.rotation.z += 0.000 *delta_time;
+    //mesh.rotation.x += 0.006 *delta_time;
+    //mesh.rotation.y += 0.000 *delta_time;
+    //mesh.rotation.z += 0.000 *delta_time;
     mesh.translation.z = 4.0 *delta_time;
-    mesh.translation.x += 1.0 *delta_time;
- //mesh.rotation.x += 0.01;
-   //mesh.rotation.y -= 0.01;
-   //mesh.rotation.z += 0.01;
-
-
-   camera.position.x += 0.008 *delta_time;
-   camera.position.y += 0.008*delta_time;
-
-    //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
-    //mesh.scale.y += 0.001;
+    //mesh.translation.x += 1.0 *delta_time;
 
     // create a view matrix looking at  target point
 
-    Vec3_t target = {0,0,4.0};
-    Vec3_t up = {0,1,0};
+    Vec3_t up = {0,1,0};  // normalized y axis
+
+    // for finding target , we have to take in account for yaw rotation etc
+    Vec3_t target = {0,0,1};
+
+    mat4_t camera_yaw_matrix = mat4_rotation_y(camera.yaw);
+    camera.direction = vec3_from_vec4(mat4_mul_vec4(camera_yaw_matrix, vec4_from_vec3(target)));
+
+    // offset camera position in the direction where the camera is pointing at
+
+    target =vec3_add(camera.position, camera.direction);
+
 
     mat4_t view_matrix = mat4_look_at(camera.position, target ,up );
 
