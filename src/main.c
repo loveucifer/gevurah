@@ -30,13 +30,18 @@
 #include "matrix.h"
 #include "light.h"
 #include "texture.h"
+#include "camera.h"
 
-
-triangle_t* triangles_to_render = NULL;
+#define MAX_TRIANGLE_PER_MESH 100000
+triangle_t triangles_to_render[MAX_TRIANGLE_PER_MESH];
+int num_triangles_to_render = 0;
+float delta_time = 0;
 
 // Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
-Vec3_t camera_pos = { 0,0,0};
+
 mat4_t projection_matrix;  // projected matrix duh
+mat4_t view_matrix;
+mat4_t world_matrix;
 
 bool is_running = false; // check init window
 int previous_frame_time = 0;
@@ -81,10 +86,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/efa.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/drone.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/efa.png");
+    load_png_texture("./models/drone.png");
 
 
 
@@ -150,21 +155,38 @@ nk_input_end(nk_ctx);
 
 void update(void){
     while (!SDL_TICKS_PASSED(SDL_GetTicks(),previous_frame_time + FRAME_TARGET_TIME));
+
+    // delta time can be used to update game objects so they dont vary with the fps we choose
+    // we get detla time and convert it to seconds
+    delta_time = (SDL_GetTicks() - previous_frame_time)/1000.0;
     previous_frame_time = SDL_GetTicks();
 
     // initalize the array of triangles to render
-    triangles_to_render = NULL;
+    num_triangles_to_render = 0;
 
-
+    mesh.rotation.x += 0.006 *delta_time;
+    mesh.rotation.y += 0.000 *delta_time;
+    mesh.rotation.z += 0.000 *delta_time;
+    mesh.translation.z = 4.0 *delta_time;
+    mesh.translation.x += 1.0 *delta_time;
  //mesh.rotation.x += 0.01;
-   mesh.rotation.y -= 0.01;
+   //mesh.rotation.y -= 0.01;
    //mesh.rotation.z += 0.01;
+
+
+   camera.position.x += 0.008 *delta_time;
+   camera.position.y += 0.008*delta_time;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
     //mesh.scale.y += 0.001;
 
-     //mesh.translation.x += 0.01;
-    mesh.translation.z = 5.0;
+    // create a view matrix looking at  target point
+
+    Vec3_t target = {0,0,4.0};
+    Vec3_t up = {0,1,0};
+
+    mat4_t view_matrix = mat4_look_at(camera.position, target ,up );
+
 
     mat4_t scale_matrix = mat4_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
 
@@ -200,6 +222,10 @@ void update(void){
             world_matrix = mat4_t_mul_mat4(translation_matrix, world_matrix);
 
             transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
+
+            // multiply view matrix by original vector to transofrm scene to camera space
+
+            transformed_vertex =  mat4_t_mul_vec4_t(view_matrix, transformed_vertex);
 
         // there is order to matrix so we have to scale first , then rotate then translate
         /// multiply scale by vertex
@@ -244,8 +270,11 @@ void update(void){
         vec3_normalize(&normal);
 
         // find a vector between point in triangle and camera origin
+        //
 
-        Vec3_t cam_ray = vec3_sub(camera_pos, vector_a);
+        Vec3_t origin = {0,0,0};
+
+        Vec3_t cam_ray = vec3_sub(origin , vector_a);
 
 
         // calculate hoiw aligned camera ray is with face normal using dot product
@@ -304,16 +333,19 @@ void update(void){
             .color = triangle_color,
 
         };
-        array_push(triangles_to_render, projected_triangle);
+            //save the projcted triangles in the array of triangles to render;
+        if (num_triangles_to_render < MAX_TRIANGLE_PER_MESH) {
+        triangles_to_render[num_triangles_to_render] = projected_triangle;
+        num_triangles_to_render++;
     }
 }
-
+}
 void render(void){
 
     // draw_grid();
 
-    int no_of_triangles = array_length(triangles_to_render);
-    for (int i = 0; i < no_of_triangles; i++) {
+
+    for (int i = 0; i < num_triangles_to_render   ; i++) {
 
       triangle_t triangle = triangles_to_render[i];
 
@@ -357,9 +389,6 @@ void render(void){
          draw_rec(triangle.points[2].x - 2, triangle.points[2].y - 2, 5, 5, 0xFFFF0000);
      }
     }
-
-    // clear array
-    array_free(triangles_to_render);
 
 
     render_color_buffer();

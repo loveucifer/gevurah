@@ -24,6 +24,8 @@ mat4_t  mat4_t_mul_mat4(mat4_t a, mat4_t b);
 
 mat4_t mat4_perspective(float fov, float aspect , float znear , float zfar );
 
+mat4_t mat4_look_at(Vec3_t eye, Vec3_t target, Vec3_t up);
+
 Vec4_t mat4_t_mul_vec4_t(mat4_t mat_proj , Vec4_t );
 
 #endif
