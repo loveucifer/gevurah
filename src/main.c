@@ -81,10 +81,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/f117.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/efa.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/f117.png");
+    load_png_texture("./models/efa.png");
 
 
 
@@ -157,7 +157,7 @@ void update(void){
 
 
  //mesh.rotation.x += 0.01;
-   mesh.rotation.y += 0.01;
+   mesh.rotation.y -= 0.01;
    //mesh.rotation.z += 0.01;
 
     //mesh.scale.x += 0.001; // create a scalar matrix that can be used to multiply the mesh vertices
@@ -276,10 +276,6 @@ void update(void){
 
         }
 
-        //calc the avg depth for each phase based on the vertices after transfromation
-        float avg_depth = (transformed_vertices[0].z + transformed_vertices[1].z + transformed_vertices[2].z) / 3.0;
-
-
         //////////////////////////////////////////////////
         /////////// light calculation ///////////////////
         ////////////////////////////////////////////////
@@ -306,23 +302,9 @@ void update(void){
                     {mesh_face.c_uv.u , mesh_face.c_uv.v},
             },
             .color = triangle_color,
-            // neeed avg depth per triangle
-            .avg_depth = avg_depth
 
         };
         array_push(triangles_to_render, projected_triangle);
-    }
-    // sort triangles to render by avg depth in ascending order
-    int num_triangles = array_length(triangles_to_render);
-    for(int i = 0; i < num_triangles ; i++){
-        for (int j = i; j < num_triangles; j++){
-            if (triangles_to_render[i].avg_depth < triangles_to_render[j].avg_depth) {
-                triangle_t temp = triangles_to_render[i];
-                triangles_to_render[i] = triangles_to_render[j];
-                triangles_to_render[j] = temp;
-
-            }
-        }
     }
 }
 
@@ -338,9 +320,9 @@ void render(void){
 
      if (render_method == RENDER_FILL || render_method == RENDER_FILL_WIRE) {
       draw_filled_triangle(
-          triangle.points[0].x, triangle.points[0].y,
-          triangle.points[1].x, triangle.points[1].y,
-          triangle.points[2].x, triangle.points[2].y,
+          triangle.points[0].x, triangle.points[0].y,triangle.points[0].z, triangle.points[0].w,
+          triangle.points[1].x, triangle.points[1].y, triangle.points[1].z, triangle.points[1].w,
+          triangle.points[2].x, triangle.points[2].y,  triangle.points[2].z, triangle.points[2].w,
           triangle.color
       );
      }
