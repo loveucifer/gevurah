@@ -1,4 +1,5 @@
 /*  Nuklear config */
+#include "clip.h"
 #include "upng.h"
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -79,6 +80,9 @@ void setup(void){
     float zfar = 100.0;
     projection_matrix = mat4_perspective( fov,  aspect,  znear,  zfar);
 
+    // initialize frustum plane with a point and a normal
+    init_frustum_planes(fov,znear, zfar);
+
     // load hardcoded texture data from the static arrray
    /* mesh_texture = (uint32_t* ) REDBRICK_TEXTURE ;
     texture_height = 64;
@@ -86,10 +90,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/cat.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/sphere.obj");    // hardcoded the path use as you wish
 
 
-    //load_png_texture("./models/drone.png");
+    load_png_texture("./models/facade.png");
 
 
 
@@ -213,6 +217,7 @@ void update(void){
     int num_faces = array_length(mesh.faces);
 
     for (int i = 0; i < num_faces; i++){
+        if (i != 4 ) continue;
         face_t mesh_face = mesh.faces[i];
 
         Vec3_t face_vertices[3];
@@ -301,6 +306,18 @@ void update(void){
         if (cull_method == CULL_BACKFACE && normal_camera < 0) {
             continue;
         }
+
+        ////////////////////////////////////////
+        /// clipping //////////////////////////
+        //////////////////////////////////////
+
+        polygon_t polygon = create_poly_from_triangle (
+            vec3_from_vec4(transformed_vertices[0]),
+            vec3_from_vec4(transformed_vertices[1]),
+            vec3_from_vec4(transformed_vertices[2]));
+
+        clip_polygon(&polygon);
+
 
         Vec4_t projected_point[3];
 

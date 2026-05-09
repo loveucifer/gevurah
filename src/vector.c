@@ -56,10 +56,20 @@ void vec2_normalize(Vec2_t *v){
     v->y /= length;
 }
 
+Vec2_t vec2_new(float x,  float y){
+    Vec2_t result = {x,y};
+    return result;
+}
+
 
 ///////////////////////////////////////
 //// vec3 ////////////////////////////
 /////////////////////////////////////
+
+Vec3_t vec3_new(float x,  float y,float z){
+    Vec3_t result = {x,y,z};
+    return result;
+}
 
 float vec3_len(Vec3_t v){
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);

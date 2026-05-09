@@ -228,6 +228,7 @@ void draw_texel(
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+
 void draw_textured_triangle(
     int x0, int y0,float z0 , float w0, float u0, float v0,
     int x1, int y1,float z1 , float w1, float u1, float v1,
