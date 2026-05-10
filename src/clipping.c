@@ -1,4 +1,4 @@
-#include "clip.h"
+#include "clipping.h"
 #include "vector.h"
 #include <math.h>
 

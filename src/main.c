@@ -1,6 +1,4 @@
 /*  Nuklear config */
-#include "clip.h"
-#include "upng.h"
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
@@ -11,6 +9,10 @@
 #define NK_MEMSET memset
 #define NK_SDL_RENDERER_IMPLEMENTATION
 #include "nuklear.h"
+#include <SDL2/SDL.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 #define NK_SDL_RENDERER_SDL_H <SDL2/SDL.h>
 #include "nuklear_sdl_renderer.h"
 
@@ -19,10 +21,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
-#include <SDL2/SDL.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
 #include "display.h"
 #include "vector.h"
 #include "mesh.h"
@@ -32,6 +30,8 @@
 #include "light.h"
 #include "texture.h"
 #include "camera.h"
+#include "clipping.h"
+#include "upng.h"
 
 #define MAX_TRIANGLE_PER_MESH 100000
 triangle_t triangles_to_render[MAX_TRIANGLE_PER_MESH];
@@ -76,8 +76,8 @@ void setup(void){
     // init perspective projection matrix
     float fov = M_PI / 3.0;
     float aspect = (float)window_height/ (float)window_width;
-    float znear = 0.1;
-    float zfar = 100.0;
+    float znear = 1.0;
+    float zfar = 20.0;
     projection_matrix = mat4_perspective( fov,  aspect,  znear,  zfar);
 
     // initialize frustum plane with a point and a normal

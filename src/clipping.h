@@ -1,5 +1,5 @@
-#ifndef CLIP_H
-#define CLIP_H
+#ifndef CLIPPPING_H
+#define CLIPPPING_H
 #include "vector.h"
 
 
