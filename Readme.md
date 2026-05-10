@@ -31,18 +31,18 @@ make run
 - [ScratchPixel](scratchapixel.com)
 - [C Programming A Modern Approach](https://archive.org/details/c-programming-a-modern-approach-2nd-ed-c-89-c-99-king-by)
 
+## Demo
+
+<p align="center">
+  <img src="./assets/demo.gif" alt="Demo" width="700">
+</p>
+
 ## Screenshots
 
 <p align="center">
-  <video controls width="700">
-    <source src="./assets/demo.webm" type="video/webm">
-  </video>
-</p>
-
-<p align="center">
+  <img src="./assets/Ui.png" alt="UI" width="700">
   <img src="./assets/filled.png" alt="Filled" width="700">
   <img src="./assets/wireframe.png" alt="Wireframe" width="700">
-  <img src="./assets/Ui.png" alt="UI" width="700">
   <img src="./assets/texture.png" alt="Texture" width="700">
 </p>
 
