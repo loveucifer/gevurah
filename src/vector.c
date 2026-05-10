@@ -61,6 +61,11 @@ Vec2_t vec2_new(float x,  float y){
     return result;
 }
 
+Vec2_t vec2_clone(Vec2_t *v){
+   Vec2_t result = {v->x , v->y};
+   return  result;
+}
+
 
 ///////////////////////////////////////
 //// vec3 ////////////////////////////
@@ -69,6 +74,11 @@ Vec2_t vec2_new(float x,  float y){
 Vec3_t vec3_new(float x,  float y,float z){
     Vec3_t result = {x,y,z};
     return result;
+}
+
+Vec3_t vec3_clone(Vec3_t *v){
+   Vec3_t result = {v->x , v->y, v->z};
+   return  result;
 }
 
 float vec3_len(Vec3_t v){

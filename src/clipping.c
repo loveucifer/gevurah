@@ -84,10 +84,22 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
         Vec3_t* current_vertex  = &polygon->vertices[0];
         Vec3_t* previous_vertex = &polygon->vertices[polygon->no_of_vertices-1] ;
 
+        float current_dot = vec3_dot(vec3_sub(*current_vertex, plane_point), plane_normal);
+        float previous_dot = vec3_dot(vec3_sub(*previous_vertex, plane_point), plane_normal);
+
         while (current_vertex != &polygon->vertices[polygon->no_of_vertices]) {
+
+            current_dot = vec3_dot(vec3_sub(*current_vertex, plane_point), plane_normal);
+
+            // current vertex inside plane
+            if (current_dot >0 ) {
+                    // add current dot inside the list of inside vertices
+                    inside_vertices[no_inside_vertices] = vec3_clone(current_vertex);
+                    no_inside_vertices++;
+            }
+
             current_vertex++;
         }
-
 
     }
 

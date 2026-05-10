@@ -90,10 +90,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/sphere.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/facade.png");
+    load_png_texture("./models/cube.png");
 
 
 
@@ -217,7 +217,7 @@ void update(void){
     int num_faces = array_length(mesh.faces);
 
     for (int i = 0; i < num_faces; i++){
-        if (i != 4 ) continue;
+        if (i != 4 ) continue; // for now
         face_t mesh_face = mesh.faces[i];
 
         Vec3_t face_vertices[3];
