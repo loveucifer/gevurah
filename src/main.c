@@ -74,14 +74,16 @@ void setup(void){
 
 
     // init perspective projection matrix
-    float fov = M_PI / 3.0;
-    float aspect = (float)window_height/ (float)window_width;
+    float aspectx = (float)window_width/(float)window_height;
+    float aspecty = (float)window_height/ (float)window_width;
+    float fovy = M_PI / 3.0;
+    float fovx = atan(tan(fovy/2) * aspectx) * 2.0 ;
     float znear = 1.0;
     float zfar = 20.0;
-    projection_matrix = mat4_perspective( fov,  aspect,  znear,  zfar);
+    projection_matrix = mat4_perspective( fovy,  aspecty,  znear,  zfar);
 
     // initialize frustum plane with a point and a normal
-    init_frustum_planes(fov,znear, zfar);
+    init_frustum_planes(fovx , fovy ,znear, zfar);
 
     // load hardcoded texture data from the static arrray
    /* mesh_texture = (uint32_t* ) REDBRICK_TEXTURE ;
@@ -149,8 +151,8 @@ void process_input(void){
             if (event.key.keysym.sym == SDLK_6) render_method = RENDER_TEXTURE_WIRE;
             if (event.key.keysym.sym == SDLK_c) cull_method = CULL_BACKFACE;
             if (event.key.keysym.sym == SDLK_q) cull_method = CULL_NONE;
-            if (event.key.keysym.sym == SDLK_a) camera.yaw += 1.0 * delta_time;  // left
-            if (event.key.keysym.sym == SDLK_d) camera.yaw -= 1.0 * delta_time; // right
+            if (event.key.keysym.sym == SDLK_a) camera.yaw -= 1.0 * delta_time;  // left
+            if (event.key.keysym.sym == SDLK_d) camera.yaw += 1.0 * delta_time; // right
             if (event.key.keysym.sym == SDLK_UP) camera.position.y += 2.0 * delta_time;  // up
             if (event.key.keysym.sym == SDLK_DOWN) camera.position.y -= 2.0 * delta_time; // down
 
@@ -217,7 +219,7 @@ void update(void){
     int num_faces = array_length(mesh.faces);
 
     for (int i = 0; i < num_faces; i++){
-        if (i != 4 ) continue; // for now
+
         face_t mesh_face = mesh.faces[i];
 
         Vec3_t face_vertices[3];
@@ -318,61 +320,75 @@ void update(void){
 
         clip_polygon(&polygon);
 
-        printf(" no of polygon vertices after clipping : %d\n", polygon.no_of_vertices);
+        // break polygon into individual triangles
+
+        triangle_t triangles_after_clipping[MAX_NO_OF_POLYGON_TRIANGLES];
+
+        int no_of_triangles_after_clipping = 0;
+
+        triangles_from_polygon(&polygon, triangles_after_clipping, &no_of_triangles_after_clipping);
+
+        for (int t= 0; t < no_of_triangles_after_clipping; t++) {
+            triangle_t triangle_after_clipping = triangles_after_clipping[t];
+            Vec4_t projected_point[3];
+
+            for (int j = 0; j < 3; j++) {
+
+                projected_point[j] = mat4_t_mul_vec4_t(projection_matrix, triangle_after_clipping.points[j]);
+
+                projected_point[j].x *= (window_width/2.0);
+                projected_point[j].y *= (window_height/2.0);
+
+                // invert y values to account for flipped screen
+                projected_point[j].y *= -1;
+
+                projected_point[j].x += (window_width / 2.0);
+                projected_point[j].y += (window_height / 2.0);
+
+            }
+
+            //////////////////////////////////////////////////
+            /////////// light calculation ///////////////////
+            ////////////////////////////////////////////////
+
+             // calc the shade intensity based on how aligned the normal is to the inverse of light ray
+            float light_intensity_factor = -vec3_dot(normal,light.direction);
 
 
-        Vec4_t projected_point[3];
 
-        for (int j = 0; j < 3; j++) {
+            // calculate triangle color based on the light
 
-            projected_point[j] = mat4_t_mul_vec4_t(projection_matrix, transformed_vertices[j]);
+            uint32_t triangle_color = light_intensity_apply(mesh_face.color, light_intensity_factor);
 
-            projected_point[j].x *= (window_width/2.0);
-            projected_point[j].y *= (window_height/2.0);
 
-            // invert y values to account for flipped screen
-            projected_point[j].y *= -1;
+            triangle_t triangle_to_render = {
+                .points = {
+                    {projected_point[0].x, projected_point[0].y, projected_point[0].z, projected_point[0].w},
+                    {projected_point[1].x, projected_point[1].y, projected_point[1].z, projected_point[1].w},
+                    {projected_point[2].x, projected_point[2].y, projected_point[2].z, projected_point[2].w},
+                },
+                .tex_cordinates = {
+                        {mesh_face.a_uv.u , mesh_face.a_uv.v},
+                        {mesh_face.b_uv.u , mesh_face.b_uv.v},
+                        {mesh_face.c_uv.u , mesh_face.c_uv.v},
+                },
+                .color = triangle_color,
 
-            projected_point[j].x += (window_width / 2.0);
-            projected_point[j].y += (window_height / 2.0);
-
+                };
+                //save the projcted triangles in the array of triangles to render;
+            if (num_triangles_to_render < MAX_TRIANGLE_PER_MESH) {
+               triangles_to_render[num_triangles_to_render++] = triangle_to_render;
         }
-
-        //////////////////////////////////////////////////
-        /////////// light calculation ///////////////////
-        ////////////////////////////////////////////////
-
-         // calc the shade intensity based on how aligned the normal is to the inverse of light ray
-        float light_intensity_factor = -vec3_dot(normal,light.direction);
-
-
-
-        // calculate triangle color based on the light
-
-        uint32_t triangle_color = light_intensity_apply(mesh_face.color, light_intensity_factor);
-
-
-        triangle_t projected_triangle = {
-            .points = {
-                {projected_point[0].x, projected_point[0].y, projected_point[0].z, projected_point[0].w},
-                {projected_point[1].x, projected_point[1].y, projected_point[1].z, projected_point[1].w},
-                {projected_point[2].x, projected_point[2].y, projected_point[2].z, projected_point[2].w},
-            },
-            .tex_cordinates = {
-                    {mesh_face.a_uv.u , mesh_face.a_uv.v},
-                    {mesh_face.b_uv.u , mesh_face.b_uv.v},
-                    {mesh_face.c_uv.u , mesh_face.c_uv.v},
-            },
-            .color = triangle_color,
-
-        };
-            //save the projcted triangles in the array of triangles to render;
-        if (num_triangles_to_render < MAX_TRIANGLE_PER_MESH) {
-        triangles_to_render[num_triangles_to_render] = projected_triangle;
-        num_triangles_to_render++;
-    }
+     }
+  }
 }
-}
+
+/*///////////////////////////////////////////////
+/////////////////////////////////////////////////
+///////////// RENDER ////////////////////////////
+/////////////////////////////////////////////////
+//////////////////////////////////////////////*/
+
 void render(void){
 
     // draw_grid();
