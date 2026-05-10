@@ -91,6 +91,22 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
 
             current_dot = vec3_dot(vec3_sub(*current_vertex, plane_point), plane_normal);
 
+            if (current_dot * previous_dot < 0) {
+
+            // find interpolation factor
+            float t = previous_dot / (previous_dot - current_dot);
+                                                                                 // calculate intersection point I = Q1 + T (Q2-Q1)
+            // insert intersection point into list of inside vertices
+            Vec3_t intersection_point = vec3_clone(current_vertex);              // I = Qc
+            intersection_point = vec3_sub(intersection_point, *previous_vertex); // I = (Qc - Qp)
+            intersection_point = vec3_mul(intersection_point, t);                // I = T (Qc - Qp)
+            intersection_point = vec3_add(intersection_point, *previous_vertex); // I = Qp + T (Qc-Qp)
+
+            inside_vertices[no_inside_vertices] = vec3_clone(&intersection_point);
+            no_inside_vertices++;
+
+            }
+
             // current vertex inside plane
             if (current_dot >0 ) {
                     // add current dot inside the list of inside vertices
@@ -98,9 +114,17 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
                     no_inside_vertices++;
             }
 
+            // move to next vertex
+            previous_dot = current_dot;
+            previous_vertex = current_vertex;
             current_vertex++;
         }
 
+        // copy list of inside vertices into destination polygon which is out parameter
+        for (int i = 0;  i < no_inside_vertices ; i++) {
+            polygon->vertices[i] = vec3_clone(&inside_vertices[i]);
+        }
+        polygon->no_of_vertices = no_inside_vertices;
     }
 
 void clip_polygon(polygon_t* polygon){
