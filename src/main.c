@@ -318,6 +318,8 @@ void update(void){
 
         clip_polygon(&polygon);
 
+        printf(" no of polygon vertices after clipping : %d\n", polygon.no_of_vertices);
+
 
         Vec4_t projected_point[3];
 

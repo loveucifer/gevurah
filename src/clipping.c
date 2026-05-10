@@ -75,7 +75,7 @@ polygon_t create_poly_from_triangle(Vec3_t v0, Vec3_t v1, Vec3_t v2){
 void clip_polygon_against_plane(polygon_t* polygon, int plane){
 
         Vec3_t plane_point = frustum_planes[plane].point;
-        Vec3_t plane_normal = frustum_planes[plane].point;
+        Vec3_t plane_normal = frustum_planes[plane].normal;
 
         // declare a static array of inside vertices
         Vec3_t inside_vertices[MAX_NO_OF_POLYGON_VERTICES];
@@ -84,7 +84,7 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
         Vec3_t* current_vertex  = &polygon->vertices[0];
         Vec3_t* previous_vertex = &polygon->vertices[polygon->no_of_vertices-1] ;
 
-        float current_dot = vec3_dot(vec3_sub(*current_vertex, plane_point), plane_normal);
+        float current_dot = 0;
         float previous_dot = vec3_dot(vec3_sub(*previous_vertex, plane_point), plane_normal);
 
         while (current_vertex != &polygon->vertices[polygon->no_of_vertices]) {
