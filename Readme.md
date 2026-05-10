@@ -34,8 +34,16 @@ make run
 ## Screenshots
 
 <p align="center">
+  <video controls width="700">
+    <source src="./assets/demo.webm" type="video/webm">
+  </video>
+</p>
+
+<p align="center">
   <img src="./assets/filled.png" alt="Filled" width="700">
   <img src="./assets/wireframe.png" alt="Wireframe" width="700">
+  <img src="./assets/Ui.png" alt="UI" width="700">
+  <img src="./assets/texture.png" alt="Texture" width="700">
 </p>
 
 ## License
