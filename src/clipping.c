@@ -1,4 +1,5 @@
 #include "clipping.h"
+#include "texture.h"
 #include "vector.h"
 #include <math.h>
 
@@ -30,7 +31,7 @@ void init_frustum_planes(float fovx, float fovy , float z_near , float z_far){
     //
     ///////////////////////////////////////////////////////////////////////////////
 	float cos_half_fov_x = cos(fovx / 2);
-	float sin_half_fov_x = sin(fovy / 2);
+	float sin_half_fov_x = sin(fovx / 2);
 
 	float cos_half_fov_y = cos(fovy / 2);
 	float sin_half_fov_y = sin(fovy / 2);
@@ -67,9 +68,10 @@ void init_frustum_planes(float fovx, float fovy , float z_near , float z_far){
 
     }
 
-polygon_t create_poly_from_triangle(Vec3_t v0, Vec3_t v1, Vec3_t v2){
+polygon_t create_poly_from_triangle(Vec3_t v0, Vec3_t v1, Vec3_t v2, tex2_t t0 , tex2_t t1 , tex2_t t2){
         polygon_t polygon = {
             .vertices = {v0, v1 , v2},
+            .texcoordiantes = {t0 ,t1, t2},
             .no_of_vertices = 3
         };
         return polygon;
@@ -78,8 +80,10 @@ polygon_t create_poly_from_triangle(Vec3_t v0, Vec3_t v1, Vec3_t v2){
 
 
 void triangles_from_polygon(polygon_t* polygon, triangle_t triangles[], int *num_triangles){
+    *num_triangles = 0;
+    if (polygon->no_of_vertices < 3) return;
 
-    for (int i = 0; i < polygon->no_of_vertices; i++) {
+    for (int i = 0; i < polygon->no_of_vertices - 2; i++) {
         int index0 = 0;
         int index1 = i + 1;
         int index2 = i + 2;
@@ -87,10 +91,18 @@ void triangles_from_polygon(polygon_t* polygon, triangle_t triangles[], int *num
         triangles[i].points[0] = vec4_from_vec3(polygon->vertices[index0]);
         triangles[i].points[1] = vec4_from_vec3(polygon->vertices[index1]);
         triangles[i].points[2] = vec4_from_vec3(polygon->vertices[index2]);
+
+        triangles[i].tex_cordinates[0] = (polygon->texcoordiantes[index0]);
+        triangles[i].tex_cordinates[1] = (polygon->texcoordiantes[index1]);
+        triangles[i].tex_cordinates[2] = (polygon->texcoordiantes[index2]);
     }
 
     *num_triangles = polygon->no_of_vertices - 2;
 
+}
+
+float float_lerp(float a, float b , float t){
+    return  a + t * (b - a);     /// interpolation formula
 }
 
 void clip_polygon_against_plane(polygon_t* polygon, int plane){
@@ -100,10 +112,14 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
 
         // declare a static array of inside vertices
         Vec3_t inside_vertices[MAX_NO_OF_POLYGON_VERTICES];
+        tex2_t inside_texcordinates[MAX_NO_OF_POLYGON_VERTICES];
         int no_inside_vertices = 0;
 
         Vec3_t* current_vertex  = &polygon->vertices[0];
-        Vec3_t* previous_vertex = &polygon->vertices[polygon->no_of_vertices-1] ;
+        tex2_t* current_texcordinate  = &polygon->texcoordiantes[0];
+
+        Vec3_t* previous_vertex = &polygon->vertices[polygon->no_of_vertices-1];
+        tex2_t* previous_texcordinate  = &polygon->texcoordiantes[polygon->no_of_vertices-1];
 
         float current_dot = 0;
         float previous_dot = vec3_dot(vec3_sub(*previous_vertex, plane_point), plane_normal);
@@ -117,13 +133,27 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
             // find interpolation factor
             float t = previous_dot / (previous_dot - current_dot);
                                                                                  // calculate intersection point I = Q1 + T (Q2-Q1)
-            // insert intersection point into list of inside vertices
+            /*/// insert intersection point into list of inside vertices
             Vec3_t intersection_point = vec3_clone(current_vertex);              // I = Qc
             intersection_point = vec3_sub(intersection_point, *previous_vertex); // I = (Qc - Qp)
             intersection_point = vec3_mul(intersection_point, t);                // I = T (Qc - Qp)
-            intersection_point = vec3_add(intersection_point, *previous_vertex); // I = Qp + T (Qc-Qp)
+            intersection_point = vec3_add(intersection_point, *previous_vertex); // I = Qp + T (Qc-Qp) /*/
+
+
+            Vec3_t intersection_point = {
+                .x = float_lerp( previous_vertex->x, current_vertex->x, t),
+                .y = float_lerp( previous_vertex->y, current_vertex->y, t),
+                .z = float_lerp( previous_vertex->z, current_vertex->z, t)
+            };
+
+            // using linear interpolation formula to  get interpolated u and v cordiantes
+            tex2_t interpolated_texcoordiante = {
+                .u = float_lerp(previous_texcordinate->u, current_texcordinate->u ,t),
+                .v = float_lerp(previous_texcordinate->v, current_texcordinate->v ,t),
+            };
 
             inside_vertices[no_inside_vertices] = vec3_clone(&intersection_point);
+            inside_texcordinates[no_inside_vertices] =  tex2_clone(&interpolated_texcoordiante);
             no_inside_vertices++;
 
             }
@@ -132,18 +162,23 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane){
             if (current_dot >0 ) {
                     // add current dot inside the list of inside vertices
                     inside_vertices[no_inside_vertices] = vec3_clone(current_vertex);
+                    inside_texcordinates[no_inside_vertices] = tex2_clone(current_texcordinate);
                     no_inside_vertices++;
+
             }
 
             // move to next vertex
             previous_dot = current_dot;
             previous_vertex = current_vertex;
             current_vertex++;
+            previous_texcordinate = current_texcordinate;
+            current_texcordinate++;
         }
 
         // copy list of inside vertices into destination polygon which is out parameter
         for (int i = 0;  i < no_inside_vertices ; i++) {
             polygon->vertices[i] = vec3_clone(&inside_vertices[i]);
+            polygon->texcoordiantes[i] = tex2_clone(&inside_texcordinates[i]);
         }
         polygon->no_of_vertices = no_inside_vertices;
     }

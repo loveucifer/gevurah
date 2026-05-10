@@ -120,6 +120,9 @@ void draw_triangle_pixel(
     int x, int y, uint32_t color,
     Vec4_t point_a, Vec4_t point_b, Vec4_t point_c
 ) {
+    // Bounds check before accessing z-buffer
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) return;
+
     // Create three vec2 to find the interpolation
     Vec2_t p = { x, y };
     Vec2_t a = vec2_from_vec4(point_a);
@@ -158,6 +161,9 @@ void draw_texel(
     Vec4_t point_a, Vec4_t point_b, Vec4_t point_c,
     tex2_t a_uv , tex2_t  b_uv , tex2_t c_uv
 ) {
+    // Bounds check before accessing z-buffer
+    if (x < 0 || x >= window_width || y < 0 || y >= window_height) return;
+
     Vec2_t p = { x, y };
     Vec2_t a = vec2_from_vec4(point_a);
     Vec2_t b = vec2_from_vec4(point_b);

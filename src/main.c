@@ -92,10 +92,10 @@ void setup(void){
 
     // loads cube value into the mesh
      //load_cube();
-    load_obj_file("./models/cube.obj");    // hardcoded the path use as you wish
+    load_obj_file("./models/efa.obj");    // hardcoded the path use as you wish
 
 
-    load_png_texture("./models/cube.png");
+    load_png_texture("./models/efa.png");
 
 
 
@@ -187,7 +187,7 @@ void update(void){
     //mesh.rotation.x += 0.006 *delta_time;
     //mesh.rotation.y += 0.000 *delta_time;
     //mesh.rotation.z += 0.000 *delta_time;
-    mesh.translation.z = 4.0 *delta_time;
+    mesh.translation.z = 5;
     //mesh.translation.x += 1.0 *delta_time;
 
     // create a view matrix looking at  target point
@@ -316,7 +316,11 @@ void update(void){
         polygon_t polygon = create_poly_from_triangle (
             vec3_from_vec4(transformed_vertices[0]),
             vec3_from_vec4(transformed_vertices[1]),
-            vec3_from_vec4(transformed_vertices[2]));
+            vec3_from_vec4(transformed_vertices[2]),
+            mesh_face.a_uv,
+            mesh_face.b_uv,
+            mesh_face.c_uv
+        );
 
         clip_polygon(&polygon);
 
@@ -333,18 +337,26 @@ void update(void){
             Vec4_t projected_point[3];
 
             for (int j = 0; j < 3; j++) {
+                // Project the current vertex using the perspective projection matrix
+                projected_point[j] = mat4_mul_vec4(projection_matrix, triangle_after_clipping.points[j]);
 
-                projected_point[j] = mat4_t_mul_vec4_t(projection_matrix, triangle_after_clipping.points[j]);
+                // Perform perspective divide with the original w value
+                if (projected_point[j].w != 0.0) {
+                    projected_point[j].x /= projected_point[j].w;
+                    projected_point[j].y /= projected_point[j].w;
+                    projected_point[j].z /= projected_point[j].w;
+                }
 
-                projected_point[j].x *= (window_width/2.0);
-                projected_point[j].y *= (window_height/2.0);
-
-                // invert y values to account for flipped screen
+                // Invert y values to account for flipped screen y-coordinates
                 projected_point[j].y *= -1;
 
+                // Scale into the view
+                projected_point[j].x *= (window_width / 2.0);
+                projected_point[j].y *= (window_height / 2.0);
+
+                // Translate the projected points to the middle of the screen
                 projected_point[j].x += (window_width / 2.0);
                 projected_point[j].y += (window_height / 2.0);
-
             }
 
             //////////////////////////////////////////////////
@@ -368,9 +380,9 @@ void update(void){
                     {projected_point[2].x, projected_point[2].y, projected_point[2].z, projected_point[2].w},
                 },
                 .tex_cordinates = {
-                        {mesh_face.a_uv.u , mesh_face.a_uv.v},
-                        {mesh_face.b_uv.u , mesh_face.b_uv.v},
-                        {mesh_face.c_uv.u , mesh_face.c_uv.v},
+                        {triangle_after_clipping.tex_cordinates[0].u , triangle_after_clipping.tex_cordinates[0].v},
+                        {triangle_after_clipping.tex_cordinates[1].u , triangle_after_clipping.tex_cordinates[1].v},
+                        {triangle_after_clipping.tex_cordinates[2].u , triangle_after_clipping.tex_cordinates[2].v},
                 },
                 .color = triangle_color,
 
