@@ -6,14 +6,43 @@
 
 // its objectively better to start these pointers as NULL because they only have value when they are passed in
 
+// variable definitions (declared extern in display.h)
+enum render_method_e render_method;
+enum cull_method_e cull_method;
+
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
-uint32_t* color_buffer = NULL;
+static uint32_t* color_buffer = NULL;
 float* z_buffer = NULL;
-SDL_Texture* color_buffer_texture = NULL;
+static SDL_Texture* color_buffer_texture = NULL;
 
 int window_width = 1280;
 int window_height = 720;
+
+// when we declare something as static in c , value is obvi gonna persist and the second is that
+// static variable is only visible in the file that it was declared so in the scope of the display.c file
+
+int get_window_width(void){
+    return window_width;
+};
+
+int get_window_height(void){
+    return window_height;
+};
+
+bool should_render_filled_triangles(void){
+    return (
+    render_method == RENDER_FILL || render_method == RENDER_FILL_WIRE
+    );
+}
+
+bool should_render_textured_triangles(void){
+    return (
+    render_method == RENDER_TEXTURED ||render_method == RENDER_TEXTURE_WIRE
+    );
+}
+
+
 
 
 bool init_window(void){
@@ -34,6 +63,8 @@ bool init_window(void){
     // 800,600 are the same way we set resolutions for eg we can do 1920 x 1080 etc
     // finally SDL_WINDOW_BORDERLESS implies that the window that we create will
     // not have any borders
+
+
 
     window = SDL_CreateWindow(
         NULL,
@@ -59,8 +90,21 @@ bool init_window(void){
         fprintf(stderr, "Error creating renderer");
         return false;
     }
+    // allocate the required memory in bytes to hold the color and the z buffer
+    color_buffer = (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
+    z_buffer     = (float *)malloc(sizeof(float) * window_width * window_height);
+
+    color_buffer_texture = SDL_CreateTexture(
+        renderer ,
+        SDL_PIXELFORMAT_RGBA32,
+        SDL_TEXTUREACCESS_STREAMING,
+        window_width,
+        window_height);
+
     return true;
 }
+
+
 
 
 void draw_triangle(int x0 , int y0 , int x1 , int y1 , int x2 , int y2, uint32_t color){
@@ -148,27 +192,36 @@ void render_color_buffer(void){
         NULL,
         NULL);
 
+    // NOTE: SDL_RenderPresent is called after Nuklear rendering in main.c
 }
 
 
 // Clear color buffer
 
 void clear_color_buffer(uint32_t color){
-    for (int y = 0; y < window_height; y++ ){
-        for (int x =0; x< window_width; x++) {
-            color_buffer[(window_width *y) + x]  = color;
-
-        }
+    for (int i = 0; i < window_width * window_height; i++ ){
+            color_buffer[i] = color;
     }
 }
 
 void clear_z_buffer( void ){
-    for (int y = 0; y < window_height; y++ ){
-        for (int x =0; x< window_width; x++) {
-            z_buffer[(window_width *y) + x]  = 1.0;
-
-        }
+    for (int i = 0; i < window_width * window_height; i++ ){
+             z_buffer[i] = 1.0;
     }
+}
+
+float get_zbuffer_at( int x, int y){
+    if (x<0 || x>= window_width || y <0 || y  >= window_height ) {
+         return 1.0;
+    }
+    return z_buffer [(window_width*y)+x];
+}
+
+void update_zbuffer(int x, int y, float value){
+    if (x<0 || x>= window_width || y <0 || y  >= window_height ) {
+         return;
+    }
+    z_buffer[(window_width*y)+x] = value;
 }
 
 // DESTTRUCTION
@@ -180,7 +233,8 @@ void clear_z_buffer( void ){
 // so like as above so below
 
 void destruct_window(void){
-    // free(color_buffer);
+    free(color_buffer);
+    free(z_buffer);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

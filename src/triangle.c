@@ -121,7 +121,7 @@ void draw_triangle_pixel(
     Vec4_t point_a, Vec4_t point_b, Vec4_t point_c
 ) {
     // Bounds check before accessing z-buffer
-    if (x < 0 || x >= window_width || y < 0 || y >= window_height) return;
+    if (x < 0 || x >= get_window_width() || y < 0 || y >= get_window_height()) return;
 
     // Create three vec2 to find the interpolation
     Vec2_t p = { x, y };

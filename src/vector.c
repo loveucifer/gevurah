@@ -137,6 +137,7 @@ float vec3_dot(Vec3_t a, Vec3_t b){
 
 void vec3_normalize(Vec3_t *v){
     float length = sqrt(v->x * v->x + v->y * v->y +  v->z * v->z );
+    if (length == 0.0f) return;
     v->x /= length;
     v->y /= length;
     v->z /= length;

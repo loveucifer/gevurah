@@ -34,20 +34,17 @@
 #include <stdio.h>
 
 #define MAX_TRIANGLE_PER_MESH 100000
+
+
 triangle_t triangles_to_render[MAX_TRIANGLE_PER_MESH];
 int num_triangles_to_render = 0;
 float delta_time = 0;
 
-// Vec3_t camera_pos = {.x = 0,.y = 0,.z = -5};
-
-mat4_t projection_matrix; // projected matrix duh
-mat4_t view_matrix;
-mat4_t world_matrix;
+mat4_t projection_matrix; // perspective projection matrix
 
 bool is_running = false; // check init window
 int previous_frame_time = 0;
 
-// nuklear struct nk_context *nk_ctx = NULL
 struct nk_context *nk_ctx = NULL;
 
 // SETUP
@@ -63,17 +60,10 @@ void setup(void) {
   render_method = RENDER_WIRE;
   cull_method = CULL_BACKFACE;
 
-  // allocate the required memory in bytes to hold the color and the z buffer
-  color_buffer =
-      (uint32_t *)malloc(sizeof(uint32_t) * window_width * window_height);
-  z_buffer = (float *)malloc(sizeof(float) * window_width * window_height);
-  color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
-                                           SDL_TEXTUREACCESS_STREAMING,
-                                           window_width, window_height);
 
   // init perspective projection matrix
-  float aspectx = (float)window_width / (float)window_height;
-  float aspecty = (float)window_height / (float)window_width;
+  float aspectx = (float)get_window_width() / (float)get_window_height();
+  float aspecty = (float)get_window_height() / (float)get_window_width( );
   float fovy = M_PI / 3.0;
   float fovx = atan(tan(fovy / 2) * aspectx) * 2.0;
   float znear = 1.0;
@@ -83,14 +73,9 @@ void setup(void) {
   // initialize frustum plane with a point and a normal
   init_frustum_planes(fovx, fovy, znear, zfar);
 
-  // load hardcoded texture data from the static arrray
-  /* mesh_texture = (uint32_t* ) REDBRICK_TEXTURE ;
-   texture_height = 64;
-   texture_width = 64;  */
 
-  // loads cube value into the mesh
-  // load_cube();
-  load_obj_file("./models/efa.obj"); // hardcoded the path use as you wish
+
+  load_obj_file("./models/efa.obj");
 
   load_png_texture("./models/efa.png");
 
@@ -108,13 +93,7 @@ void setup(void) {
   debug_ui_init();
   debug_ui_set_aero_theme(nk_ctx);
 
-  // usage
-  /* Vec3_t a = {2.5 , 6.4 , 3.0};
-   Vec3_t b = {-2.2 , 1.4 , -1.0};
 
-
-   float a_length = vec3_len(a);
-   float b_length = vec3_len(b); */
 }
 
 void process_input(void) {
@@ -236,51 +215,24 @@ void update(void) {
     face_vertices[0] = mesh.vertices[mesh_face.a];
     face_vertices[1] = mesh.vertices[mesh_face.b];
     face_vertices[2] = mesh.vertices[mesh_face.c];
-    // triangle_t projected_triangle;
-    // loop all three vertices of this face and transofrm them
     Vec4_t transformed_vertices[3];
+
+    // world matrix: scale -> rotate -> translate (computed once per face)
+    mat4_t world_matrix = mat4_identity();
+    world_matrix = mat4_t_mul_mat4(scale_matrix, world_matrix);
+    world_matrix = mat4_t_mul_mat4(rotation_matrix_z, world_matrix);
+    world_matrix = mat4_t_mul_mat4(rotation_matrix_y, world_matrix);
+    world_matrix = mat4_t_mul_mat4(rotation_matrix_x, world_matrix);
+    world_matrix = mat4_t_mul_mat4(translation_matrix, world_matrix);
 
     for (int j = 0; j < 3; j++) {
       Vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-      /// world matrix is basically the multiplication of all other matrices
-      mat4_t world_matrix = mat4_identity();
-
-      world_matrix = mat4_t_mul_mat4(scale_matrix, world_matrix);
-      world_matrix = mat4_t_mul_mat4(rotation_matrix_z, world_matrix);
-      world_matrix = mat4_t_mul_mat4(rotation_matrix_y, world_matrix);
-      world_matrix = mat4_t_mul_mat4(rotation_matrix_x, world_matrix);
-      world_matrix = mat4_t_mul_mat4(translation_matrix, world_matrix);
-
+      // world transform then view transform
       transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
+      transformed_vertex = mat4_mul_vec4(view_matrix, transformed_vertex);
 
-      // multiply view matrix by original vector to transofrm scene to camera
-      // space
-
-      transformed_vertex = mat4_t_mul_vec4_t(view_matrix, transformed_vertex);
-
-      // there is order to matrix so we have to scale first , then rotate then
-      // translate
-      /// multiply scale by vertex
-      /* transformed_vertex =  mat4_mul_vec4(scale_matrix, transformed_vertex);
-       // multiply rotation by vertex
-       transformed_vertex =  mat4_mul_vec4(rotation_matrix_x,
-       transformed_vertex); transformed_vertex =
-       mat4_mul_vec4(rotation_matrix_y, transformed_vertex); transformed_vertex
-       =  mat4_mul_vec4(rotation_matrix_z, transformed_vertex);
-       /// multiply translation by vertex
-       transformed_vertex =  mat4_mul_vec4(translation_matrix,
-       transformed_vertex); */
-
-      // diff
-      /*transformed_vertex = Vec3_rotate_x(transformed_vertex, mesh.rotation.x);
-      transformed_vertex = Vec3_rotate_y(transformed_vertex, mesh.rotation.y);
-      transformed_vertex = Vec3_rotate_z(transformed_vertex, mesh.rotation.z);*/
-      // diff
-
-      // transformed_vertex.z += 5;
-
-      transformed_vertices[j] = (transformed_vertex);
+      transformed_vertices[j] = transformed_vertex;
     }
 
     /////////////////////////////////
@@ -360,12 +312,12 @@ void update(void) {
         projected_point[j].y *= -1;
 
         // Scale into the view
-        projected_point[j].x *= (window_width / 2.0);
-        projected_point[j].y *= (window_height / 2.0);
+        projected_point[j].x *= (get_window_width() / 2.0);
+        projected_point[j].y *= (get_window_height() / 2.0);
 
         // Translate the projected points to the middle of the screen
-        projected_point[j].x += (window_width / 2.0);
-        projected_point[j].y += (window_height / 2.0);
+        projected_point[j].x += (get_window_width() / 2.0);
+        projected_point[j].y += (get_window_height() / 2.0);
       }
 
       //////////////////////////////////////////////////
@@ -419,6 +371,9 @@ void update(void) {
 
 void render(void) {
 
+    clear_color_buffer(0XFF000000);
+    clear_z_buffer();
+
   /* [#7] grid toggle from debug panel */
   if (dbg_show_grid)
     draw_grid();
@@ -427,7 +382,7 @@ void render(void) {
 
     triangle_t triangle = triangles_to_render[i];
 
-    if (render_method == RENDER_FILL || render_method == RENDER_FILL_WIRE) {
+    if (should_render_filled_triangles()) {
       draw_filled_triangle(
           triangle.points[0].x, triangle.points[0].y, triangle.points[0].z,
           triangle.points[0].w, triangle.points[1].x, triangle.points[1].y,
@@ -437,8 +392,7 @@ void render(void) {
     }
 
     // draw textured triangle
-    if (render_method == RENDER_TEXTURED ||
-        render_method == RENDER_TEXTURE_WIRE) {
+    if (should_render_textured_triangles()) {
       draw_textured_triangle(
           triangle.points[0].x, triangle.points[0].y, triangle.points[0].z,
           triangle.points[0].w, triangle.tex_cordinates[0].u,
@@ -474,8 +428,7 @@ void render(void) {
   }
 
   render_color_buffer();
-  clear_color_buffer(0XFF000000);
-  clear_z_buffer();
+
 
   // debug panel moved
   int total_faces = array_length(mesh.faces);
@@ -521,9 +474,7 @@ void render(void) {
 // free memory
 
 void free_resources(void) {
-  free(color_buffer);
-  free(z_buffer);
-  upng_free(png_texture);
+  if (png_texture) upng_free(png_texture);
   array_free(mesh.faces);
   array_free(mesh.vertices);
   nk_sdl_shutdown();

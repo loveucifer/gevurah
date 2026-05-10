@@ -13,13 +13,17 @@ uint32_t* mesh_texture = NULL;
 
 void  load_png_texture(char* filename){
     png_texture = upng_new_from_file(filename);
-    if (png_texture != NULL) {
-        upng_decode(png_texture);
+    if (png_texture == NULL) {
+        fprintf(stderr, "Failed to load texture: %s\n", filename);
+        return;
     }
+    upng_decode(png_texture);
     if (upng_get_error(png_texture) == UPNG_EOK) {
         mesh_texture = (uint32_t*) upng_get_buffer(png_texture);
         texture_width = upng_get_width(png_texture);
         texture_height = upng_get_height(png_texture);
+    } else {
+        fprintf(stderr, "Failed to decode texture: %s\n", filename);
     }
 }
 
